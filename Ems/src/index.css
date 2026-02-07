@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+#tasklist::-webkit-scrollbar{
+    display: none;
+}
+
+
+
+body{
+    background-color: black;
+    color: white;
+}
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slideIn 0.4s ease-out;
+}
