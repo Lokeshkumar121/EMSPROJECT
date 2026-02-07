@@ -1,0 +1,73 @@
+import express from "express";
+import dotenv from "dotenv";
+import connectDB from "./config/db.js";
+import employeeRoutes from "./routes/employeeRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
+import cors from "cors";
+import http from "http";
+import { Server } from "socket.io";
+
+dotenv.config();
+connectDB();
+
+const app = express();
+
+// ✅ MIDDLEWARE
+app.use(cors({
+  origin: "http://localhost:5173",
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+  credentials: true
+}));
+app.use(express.json());
+
+// ✅ LOGGER
+app.use((req, res, next) => {
+  console.log("➡️", req.method, req.url);
+  next();
+});
+
+// ✅ ROUTES
+app.use("/api/employees", employeeRoutes);
+app.use("/api/auth", authRoutes);
+
+// ✅ ROOT
+app.get("/", (req, res) => {
+  res.send("Hello i am root");
+});
+
+// ✅ CREATE HTTP SERVER (important!)
+const PORT = process.env.PORT || 8080;
+const server = http.createServer(app); // <-- ye missing tha
+
+// ✅ SOCKET.IO SETUP
+export const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+});
+
+// ✅ SOCKET CONNECTION HANDLER
+io.on("connection", (socket) => {
+  // console.log("🔔 New user connected:", socket.id);
+
+  // Employee joins their personal room
+  socket.on("joinRoom", (userId) => {
+    socket.join(userId);
+    // console.log(`User ${userId} joined their room`);
+  });
+
+  // Employee task status update
+  socket.on("taskStatusUpdate", (data) => {
+    io.emit("taskStatusUpdate", data); // notify admin
+    // console.log("Task status update:", data);
+  });
+
+  socket.on("disconnect", () => {
+    // console.log("❌ User disconnected:", socket.id);
+  });
+});
+
+// ✅ START SERVER
+server.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
