@@ -32,10 +32,9 @@ const RegistrationForm = ({ onClose }) => {
       // 🔹 Server pe add
       await axios.post("http://ems-backend-jy3w.onrender.com/api/employees", newEmployee);
 
-      // 🔹 Context + LocalStorage update
-      const updatedUserData = userData ? [...userData, newEmployee] : [newEmployee];
-      setUserData(updatedUserData);
-      localStorage.setItem('employees', JSON.stringify(updatedUserData));
+      // Backend se jo employee create hua hai uska data use karo
+setUserData(prev => [...prev, res.data]);
+localStorage.setItem('employees', JSON.stringify([...userData, res.data]));
 
       toast.success("Employee added successfully!");
       setFirstName(""); setLastName(""); setEmail(""); setPassword("");
