@@ -36,7 +36,7 @@ app.get("/", (req, res) => {
 });
 
 // ✅ CREATE HTTP SERVER (important!)
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 5000;
 const server = http.createServer(app); // <-- ye missing tha
 
 // ✅ SOCKET.IO SETUP

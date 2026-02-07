@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 
 export const Authcontext = createContext();
 
-const API = "http://localhost:8080/api/employees";
+const API = "http://localhost:5001/api/employees";
 
 const AuthProvider = ({ children }) => {
   // 🔹 All employees
