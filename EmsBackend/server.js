@@ -42,7 +42,7 @@ const server = http.createServer(app); // <-- ye missing tha
 // ✅ SOCKET.IO SETUP
 export const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: "https://emsproject-lh2b.onrender.com",
     methods: ["GET", "POST"],
     credentials: true,
   },
