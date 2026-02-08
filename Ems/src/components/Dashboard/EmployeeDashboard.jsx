@@ -69,17 +69,9 @@ console.log("All employees:", userData.map(e => e.email));
   return (
     <div className='min-h-screen w-full p-4 sm:p-10 bg-[#1c1c1c] text-white flex flex-col gap-6'>
       <Header changeUser={changeUser} user={loggedInUser}  />
-      {/* Task Numbers */}
-      <div className='flex flex-col md:flex-row md:gap-6'>
-        <div className='flex-1 mb-4 md:mb-0'>
-          <TaskNumberslist data={employee} />
-        </div>
-        <div className='flex-1'>
-          <Tasklist data={employee} />
-        </div>
-      </div>
-
-      <ToastContainer />
+      <TaskNumberslist data={employee} />
+      <Tasklist data={employee} />
+      <ToastContainer /> {/* 🔹 Toast container */}
     </div>
   )
 }
