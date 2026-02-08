@@ -11,6 +11,18 @@ import { useEffect } from "react";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+// 🔹 Reusable StatusCard component
+const StatusCard = ({ title, subtitle, icon }) => {
+  return (
+    <div className="flex items-center justify-center h-[70vh]">
+      <div className="bg-[#111111] text-white rounded-2xl shadow-lg p-10 w-80 sm:w-96 text-center border border-gray-800 hover:scale-105 transition-transform duration-300">
+        {icon && <div className="text-5xl mb-4">{icon}</div>}
+        <h2 className="text-2xl font-bold mb-2">{title}</h2>
+        {subtitle && <p className="text-gray-400">{subtitle}</p>}
+      </div>
+    </div>
+  )
+}
 const EmployeeDashboard = ({ changeUser , user }) => {
   const {userData} = useContext(Authcontext)
 
@@ -47,11 +59,19 @@ const EmployeeDashboard = ({ changeUser , user }) => {
 
   // loading state
   if (!userData || userData.length === 0) {
-    return <p className="text-white">Loading employees...</p>
+    return <StatusCard 
+              title="Loading Employees..." 
+              subtitle="Please wait while we fetch the data." 
+              icon="⏳"
+            />
   }
 
   if (!loggedInUser) {
-    return <p className="text-white">No user logged in</p>
+    return  <StatusCard 
+              title="No User Logged In" 
+              subtitle="Please log in to continue." 
+              icon="❌"
+            />
   }    
 
   // find employee
@@ -63,7 +83,11 @@ console.log("All employees:", userData.map(e => e.email));
 
 
   if (!employee) {
-    return <p className="text-white">Employee not found</p>
+    return  <StatusCard 
+              title="Employee Not Found" 
+              subtitle="We couldn't find your profile." 
+              icon="⚠️"
+            />
   }
 
   return (
