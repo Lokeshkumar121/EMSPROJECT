@@ -71,14 +71,8 @@ const Admindashboard = ({ changeUser, user }) => {
       )}
 
       {/* Task Management */}
-     <div className="flex flex-col md:flex-row md:gap-6">
-        <div className="flex-1 mb-4 md:mb-0">
-          <CreateTask />
-        </div>
-        <div className="flex-1">
-          <Alltask />
-        </div>
-      </div>
+      <CreateTask />
+      <Alltask />
         
     </div>
   )
