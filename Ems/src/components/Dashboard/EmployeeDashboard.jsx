@@ -67,7 +67,7 @@ console.log("All employees:", userData.map(e => e.email));
   }
 
   return (
-    <div className='min-h-screen w-full p-4 sm:p-10 bg-[#1c1c1c] text-white flex flex-col gap-6'>
+    <div className='p-10 bg-[#1c1c1c] text-white h-screen'>
       <Header changeUser={changeUser} user={loggedInUser}  />
       <TaskNumberslist data={employee} />
       <Tasklist data={employee} />
