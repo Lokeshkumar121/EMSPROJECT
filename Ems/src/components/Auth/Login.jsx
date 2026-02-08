@@ -23,7 +23,7 @@ const Login = ({ setUser }) => {
     // setPassword("");
     try {
     // 🔹 Call backend API
-    const res = await axios.post("http://ems-backend-jy3w.onrender.com/api/auth/login", {
+    const res = await axios.post("https://ems-backend-jy3w.onrender.com/api/auth/login", {
       email,
       password,
     });
