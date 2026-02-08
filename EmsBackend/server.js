@@ -14,7 +14,7 @@ const app = express();
 
 // ✅ MIDDLEWARE
 app.use(cors({
-  origin: "https://emsproject-lh2b.onrender.com/",
+  origin: ["https://emsproject-lh2b.onrender.com" , "http://localhost:5173"],
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   credentials: true
 }));
