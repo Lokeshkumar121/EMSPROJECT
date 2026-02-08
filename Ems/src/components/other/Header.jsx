@@ -25,35 +25,35 @@ const Header = ({ changeUser , user}) => {
   if (!user?.role) return null;
 
   return (
-    <header className="w-full flex items-center justify-between px-8 py-4 bg-[#0f0f0f] border-b border-gray-800">
+     <header className="w-full flex flex-col md:flex-row items-center justify-between px-4 sm:px-6 md:px-8 py-4 bg-[#0f0f0f] border-b border-gray-800 gap-4 md:gap-0">
       
       {/* LEFT */}
-      <div>
-        <h1 className="text-xl font-semibold text-white">
+      <div className="text-center md:text-left">
+        <h1 className="text-lg sm:text-xl font-semibold text-white">
           Task Manager
         </h1>
-        <p className="text-sm text-gray-400">
+        <p className="text-sm text-gray-400 mt-1">
           Welcome,{" "}
           <span className="text-emerald-400 font-medium">
             {user.name || `${user.firstName || ""} ${user.lastName || ""}` || "User"}
           </span>
         </p>
-        
       </div>
 
-     <div className="px-6 py-3 bg-gray-900 text-white rounded-xl border border-gray-700 shadow-sm font-medium">
-              <LiveDate />
-            </div>
+      {/* CENTER - Live Date */}
+      <div className="px-4 py-2 bg-gray-900 text-white rounded-xl border border-gray-700 shadow-sm font-medium">
+        <LiveDate />
+      </div>
 
       {/* RIGHT */}
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-center md:text-right">
         <span className="px-3 py-1 text-xs rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
           {user.role === "admin" ? "Admin" : "Employee"}
         </span>
 
         <button
           onClick={logoutHandler}
-          className="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-700
+          className="px-4 sm:px-5 py-2 rounded-xl bg-red-600 hover:bg-red-700
                      text-sm font-semibold text-white transition active:scale-95"
         >
           Logout
