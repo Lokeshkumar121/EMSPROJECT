@@ -48,15 +48,15 @@ const Admindashboard = ({ changeUser, user }) => {
 
 
   return (
-    <div className='h-screen w-full p-7'>
+    <div className='min-h-screen w-full p-4 sm:p-7 bg-[#1c1c1c] text-white flex flex-col gap-6'>
       <Header changeUser={changeUser} user={user} />
 
       {/* Top Controls */}
-      <div className="my-4 flex flex-wrap items-center gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         {/* Add Employee Button */}
         <button
           onClick={() => setShowAddForm(true)}
-          className="bg-emerald-600 px-6 py-3 rounded-xl text-white hover:bg-emerald-700 transition-colors"
+          className="bg-emerald-600 px-4 sm:px-6 py-2 sm:py-3 rounded-xl text-white hover:bg-emerald-700 transition-colors w-full sm:w-auto"
         >
           Add Employee
         </button>
@@ -71,8 +71,14 @@ const Admindashboard = ({ changeUser, user }) => {
       )}
 
       {/* Task Management */}
-      <CreateTask />
-      <Alltask />
+     <div className="flex flex-col md:flex-row md:gap-6">
+        <div className="flex-1 mb-4 md:mb-0">
+          <CreateTask />
+        </div>
+        <div className="flex-1">
+          <Alltask />
+        </div>
+      </div>
         
     </div>
   )

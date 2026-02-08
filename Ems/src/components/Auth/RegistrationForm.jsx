@@ -47,18 +47,18 @@ localStorage.setItem('employees', JSON.stringify([...userData, res.data]));
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-gray-900 p-8 rounded-2xl w-full max-w-md text-white">
-        <h2 className="text-2xl font-bold mb-4">Add New Employee</h2>
-        <form onSubmit={submitHandler} className="flex flex-col gap-4">
-          <input type="text" placeholder="First Name" value={firstName} onChange={e=>setFirstName(e.target.value)} required className="px-4 py-2 rounded-xl bg-gray-800 border border-gray-700"/>
-          <input type="text" placeholder="Last Name" value={lastName} onChange={e=>setLastName(e.target.value)} required className="px-4 py-2 rounded-xl bg-gray-800 border border-gray-700"/>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
+      <div className="bg-gray-900 p-6 sm:p-8 rounded-2xl w-full max-w-md text-white">
+        <h2 className="text-xl sm:text-2xl font-bold mb-4 text-center">Add New Employee</h2>
+        <form onSubmit={submitHandler} className="flex flex-col gap-3 sm:gap-4">
+          <input type="text" placeholder="First Name" value={firstName} onChange={e=>setFirstName(e.target.value)} required className="px-3 sm:px-4 py-2 rounded-xl bg-gray-800 border border-gray-700 w-full"/>
+          <input type="text" placeholder="Last Name" value={lastName} onChange={e=>setLastName(e.target.value)} required className="px-3 sm:px-4 py-2 rounded-xl bg-gray-800 border border-gray-700 w-full"/>
           <input type="email" placeholder="Email" value={email} onChange={e=>setEmail(e.target.value)} required className="px-4 py-2 rounded-xl bg-gray-800 border border-gray-700"/>
-          <input type="password" placeholder="Password" value={password} onChange={e=>setPassword(e.target.value)} required className="px-4 py-2 rounded-xl bg-gray-800 border border-gray-700"/>
+          <input type="password" placeholder="Password" value={password} onChange={e=>setPassword(e.target.value)} required className="px-3 sm:px-4 py-2 rounded-xl bg-gray-800 border border-gray-700 w-full"/>
 
           <div className="flex justify-between mt-4">
-            <button type="submit" className="bg-emerald-600 px-6 py-2 rounded-xl hover:bg-emerald-700">Add Employee</button>
-            <button type="button" onClick={onClose} className="bg-red-600 px-6 py-2 rounded-xl hover:bg-red-700">Cancel</button>
+            <button type="submit" className="bg-emerald-600 px-4 sm:px-6 py-2 rounded-xl hover:bg-emerald-700 w-full sm:w-auto">Add Employee</button>
+            <button type="button" onClick={onClose} className="bg-red-600 px-4 sm:px-6 py-2 rounded-xl hover:bg-red-700 w-full sm:w-auto">Cancel</button>
           </div>
         </form>
       </div>
