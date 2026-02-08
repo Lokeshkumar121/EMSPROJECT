@@ -14,7 +14,7 @@ const app = express();
 
 // ✅ MIDDLEWARE
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: "https://emsproject-lh2b.onrender.com/",
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   credentials: true
 }));
@@ -42,7 +42,7 @@ const server = http.createServer(app); // <-- ye missing tha
 // ✅ SOCKET.IO SETUP
 export const io = new Server(server, {
   cors: {
-    origin: "https://emsproject-lh2b.onrender.com",
+    origin: ["https://emsproject-lh2b.onrender.com" , "http://localhost:5173"],
     methods: ["GET", "POST"],
     credentials: true,
   },
