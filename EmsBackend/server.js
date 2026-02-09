@@ -1,8 +1,11 @@
 import express from "express";
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
-import analyticsRoutes from "./routes/analyticsRoutes.js"
 import employeeRoutes from "./routes/employeeRoutes.js";
+import authRoutes from "./routes/authRoutes.js"
+import analyticsRoutes from "./routes/analyticsRoutes.js"
+
+
 
 import cors from "cors";
 import http from "http";
@@ -40,6 +43,8 @@ app.use((req, res, next) => {
 app.use("/api/employees", employeeRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/analytics", analyticsRoutes);
+console.log("Analytics routes loaded");
+
 
 
 // ✅ ROOT
