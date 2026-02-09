@@ -5,12 +5,12 @@ const employeeSchema = new mongoose.Schema({
   firstName: { type: String, required: true },
   lastName: { type: String },
   email: { type: String, required: true, unique: true },
-  password : {type : String , required : true },
+  password: { type: String, required: true },
   role: {
-  type: String,
-  enum: ["admin", "employee"],
-  default: "employee"
-},
+    type: String,
+    enum: ["admin", "employee"],
+    default: "employee"
+  },
   tasks: [
     {
       title: String,
@@ -21,6 +21,9 @@ const employeeSchema = new mongoose.Schema({
       complete: Boolean,
       failed: Boolean,
       newTask: Boolean,
+      assignedAt: { type: Date, default: Date.now },
+      completedAt: Date,
+      expectedTime: Number, // minutes (optional for speed bonus)
     },
   ],
   taskCounts: {
@@ -29,7 +32,24 @@ const employeeSchema = new mongoose.Schema({
     complete: { type: Number, default: 0 },
     failed: { type: Number, default: 0 },
   },
-});
+  // salary system 
+    baseSalaryPerDay: {
+    type: Number,
+    default: 1000, // ₹1000 per day (change later)
+  },
+
+  todaySalary: {
+    type: Number,
+    default: 1000,
+  },
+
+  salaryStats: {
+    completedToday: { type: Number, default: 0 },
+    failedToday: { type: Number, default: 0 },
+    bonusPercent: { type: Number, default: 0 },
+    penaltyPercent: { type: Number, default: 0 },
+  },
+} , { timestamps: true });
 
 const Employee = mongoose.model("Employee", employeeSchema);
 export default Employee;

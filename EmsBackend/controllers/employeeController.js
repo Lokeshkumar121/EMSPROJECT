@@ -1,5 +1,6 @@
 import Employee from "../models/Employee.js";
 import { io } from "../server.js"; // ✅ Import Socket.io instance
+import { calculateSalary } from "../utils/calculateSalary.js";
 
 // 🔹 Get all employees
 export const getEmployees = async (req, res) => {
@@ -113,6 +114,13 @@ export const updateTaskStatus = async (req, res) => {
       return res.status(404).json({ message: "Employee not found" });
     }
 
+      if (isNewDay(employee.updatedAt)) {
+      employee.salaryStats.completedToday = 0;
+      employee.salaryStats.failedToday = 0;
+      employee.salaryStats.bonusPercent = 0;
+      employee.salaryStats.penaltyPercent = 0;
+      employee.todaySalary = employee.baseSalaryPerDay;
+    }
     const task = employee.tasks[taskIndex];
     if (!task) {
       return res.status(404).json({ message: "Task not found" });
@@ -134,8 +142,38 @@ export const updateTaskStatus = async (req, res) => {
       // 🔥 SET NEW STATUS
     if (status === "new") task.newTask = true;
     if (status === "active") task.active = true;
-    if (status === "complete") task.complete = true;
-    if (status === "failed") task.failed = true;
+
+     if (status === "complete") {
+      task.complete = true;
+      task.completedAt = new Date();
+
+      employee.taskCounts.complete++;
+      employee.salaryStats.completedToday++;
+      employee.salaryStats.bonusPercent += 10;
+    }
+     if (status === "failed") {
+      task.failed = true;
+
+      employee.taskCounts.failed++;
+      employee.salaryStats.failedToday++;
+      employee.salaryStats.penaltyPercent += 7;
+    }
+     let fastCompleted = 0;
+    if (
+      task.complete &&
+      task.expectedTime &&
+      (task.completedAt - task.assignedAt) / 60000 <= task.expectedTime
+    ) {
+      fastCompleted = 1;
+      employee.salaryStats.bonusPercent += 10;
+    }
+        // 💰 FINAL SALARY CALCULATION
+    employee.todaySalary = calculateSalary({
+      baseSalary: employee.baseSalaryPerDay,
+      completed: employee.salaryStats.completedToday,
+      failed: employee.salaryStats.failedToday,
+      fastCompleted,
+    });
 
     // 🔥 ADD NEW COUNTS
      // 🔥 ADD NEW COUNTS
@@ -150,9 +188,15 @@ export const updateTaskStatus = async (req, res) => {
       employeeName: `${employee.firstName} ${employee.lastName}`,
       taskId: task._id || taskIndex,
       status,
+      todaySalary: employee.todaySalary,
     });
-    res.status(200).json(employee);
+    res.status(200).json({
+      message: "Task updated & salary recalculated",
+      todaySalary: employee.todaySalary,
+      stats: employee.salaryStats,
+    });
   } catch (err) {
+      console.error("UPDATE TASK ERROR:", err);
     res.status(500).json({ message: err.message });
   }
 };
