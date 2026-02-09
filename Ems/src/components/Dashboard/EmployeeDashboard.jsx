@@ -4,12 +4,13 @@ import TaskNumberslist from '../other/TaskNumberslist'
 import Tasklist from '../task/Tasklist'
 import { Authcontext } from '../../context/AuthProvider'
 import socket from "../../socket";
-
+import {SalaryCard} from "./SalaryCard"
 
 import { useEffect } from "react";
 // import { io } from "socket.io-client";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import SalaryCard from './SalaryCard'
 
 // 🔹 Reusable StatusCard component
 const StatusCard = ({ title, subtitle, icon }) => {
@@ -93,6 +94,7 @@ console.log("All employees:", userData.map(e => e.email));
   return (
     <div className='p-10 bg-[#1c1c1c] text-white h-screen'>
       <Header changeUser={changeUser} user={loggedInUser}  />
+      <SalaryCard />
       <TaskNumberslist data={employee} />
       <Tasklist data={employee} />
       <ToastContainer /> {/* 🔹 Toast container */}
