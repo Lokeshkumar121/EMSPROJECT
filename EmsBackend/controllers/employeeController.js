@@ -131,10 +131,17 @@ export const updateTaskStatus = async (req, res) => {
     }
 
     // 🔥 REMOVE OLD COUNTS
-    if (task.newTask) employee.taskCounts.newTask--;
-    if (task.active) employee.taskCounts.active--;
-    if (task.complete) employee.taskCounts.complete--;
-    if (task.failed) employee.taskCounts.failed--;
+     if (task.newTask && employee.taskCounts.newTask > 0)
+      employee.taskCounts.newTask--;
+
+    if (task.active && employee.taskCounts.active > 0)
+      employee.taskCounts.active--;
+
+    if (task.complete && employee.taskCounts.complete > 0)
+      employee.taskCounts.complete--;
+
+    if (task.failed && employee.taskCounts.failed > 0)
+      employee.taskCounts.failed--;
 
     // 🔥 RESET ALL FLAGS
     task.newTask = false;
@@ -144,32 +151,42 @@ export const updateTaskStatus = async (req, res) => {
 
     // 🔥 SET NEW STATUS
       // 🔥 SET NEW STATUS
-    if (status === "new") task.newTask = true;
-    if (status === "active") task.active = true;
+     let fastCompleted = 0;
 
-     if (status === "complete") {
+    if (status === "new") {
+      task.newTask = true;
+      employee.taskCounts.newTask++;
+    }
+
+    if (status === "active") {
+      task.active = true;
+      employee.taskCounts.active++;
+    }
+
+    if (status === "complete") {
       task.complete = true;
       task.completedAt = new Date();
 
       employee.taskCounts.complete++;
       employee.salaryStats.completedToday++;
       employee.salaryStats.bonusPercent += 10;
+
+      // ⏱ Fast completion bonus
+      if (
+        task.expectedTime &&
+        (task.completedAt - task.assignedAt) / 60000 <= task.expectedTime
+      ) {
+        fastCompleted = 1;
+        employee.salaryStats.bonusPercent += 10;
+      }
     }
-     if (status === "failed") {
+
+    if (status === "failed") {
       task.failed = true;
 
       employee.taskCounts.failed++;
       employee.salaryStats.failedToday++;
       employee.salaryStats.penaltyPercent += 7;
-    }
-     let fastCompleted = 0;
-    if (
-      task.complete &&
-      task.expectedTime &&
-      (task.completedAt - task.assignedAt) / 60000 <= task.expectedTime
-    ) {
-      fastCompleted = 1;
-      employee.salaryStats.bonusPercent += 10;
     }
         // 💰 FINAL SALARY CALCULATION
     employee.todaySalary = calculateSalary({
