@@ -89,10 +89,10 @@ export const addTaskToEmployee = async (req, res) => {
     employee.tasks.push(task);
 
     // Update taskCounts automatically
-    if (task.newTask) employee.taskCounts.newTask += 1;
-    if (task.active) employee.taskCounts.active += 1;
-    if (task.complete) employee.taskCounts.complete += 1;
-    if (task.failed) employee.taskCounts.failed += 1;
+    // if (task.newTask) employee.taskCounts.newTask += 1;
+    // if (task.active) employee.taskCounts.active += 1;
+    // if (task.complete) employee.taskCounts.complete += 1;
+    // if (task.failed) employee.taskCounts.failed += 1;
 
     await employee.save();
       // 🔔 Emit notification to employee in real-time
@@ -181,10 +181,10 @@ export const updateTaskStatus = async (req, res) => {
 
     // 🔥 ADD NEW COUNTS
      // 🔥 ADD NEW COUNTS
-    if (task.newTask) employee.taskCounts.newTask++;
-    if (task.active) employee.taskCounts.active++;
-    if (task.complete) employee.taskCounts.complete++;
-    if (task.failed) employee.taskCounts.failed++;
+    // if (task.newTask) employee.taskCounts.newTask++;
+    // if (task.active) employee.taskCounts.active++;
+    // if (task.complete) employee.taskCounts.complete++;
+    // if (task.failed) employee.taskCounts.failed++;
 
     await employee.save();
      io.emit("taskStatusUpdate", {
