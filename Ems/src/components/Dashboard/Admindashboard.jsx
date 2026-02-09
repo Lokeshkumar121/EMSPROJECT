@@ -43,14 +43,16 @@ const Admindashboard = ({ changeUser, user }) => {
     }
   });
 
-  return () => socket.disconnect();
+  return () => {
+  socket.off("taskStatusUpdate");
+};
 }, []);
 
 
   return (
     <div className='min-h-screen w-full p-4 sm:p-7 bg-[#1c1c1c] text-white flex flex-col gap-6'>
       <Header changeUser={changeUser} user={user} />
-       <SalaryCard employee={employee} />
+       
 
       {/* Top Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

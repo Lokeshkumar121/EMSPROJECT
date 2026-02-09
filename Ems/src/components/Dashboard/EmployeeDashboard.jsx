@@ -4,7 +4,7 @@ import TaskNumberslist from '../other/TaskNumberslist'
 import Tasklist from '../task/Tasklist'
 import { Authcontext } from '../../context/AuthProvider'
 import socket from "../../socket";
-import {SalaryCard} from "./SalaryCard"
+
 
 import { useEffect } from "react";
 // import { io } from "socket.io-client";
@@ -94,7 +94,7 @@ console.log("All employees:", userData.map(e => e.email));
   return (
     <div className='p-10 bg-[#1c1c1c] text-white h-screen'>
       <Header changeUser={changeUser} user={loggedInUser}  />
-      <SalaryCard />
+      <SalaryCard employee={employee}/>
       <TaskNumberslist data={employee} />
       <Tasklist data={employee} />
       <ToastContainer /> {/* 🔹 Toast container */}

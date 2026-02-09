@@ -1,7 +1,11 @@
 import Employee from "../models/Employee.js";
 import { io } from "../server.js"; // ✅ Import Socket.io instance
 import { calculateSalary } from "../utils/calculateSalary.js";
-
+const isNewDay = (date) => {
+  if (!date) return true;
+  const today = new Date().toDateString();
+  return new Date(date).toDateString() !== today;
+};
 // 🔹 Get all employees
 export const getEmployees = async (req, res) => {
   try {
