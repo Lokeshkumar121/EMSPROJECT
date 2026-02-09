@@ -10,7 +10,7 @@ import { useEffect } from "react";
 // import { io } from "socket.io-client";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import SalaryCard from './SalaryCard'
+import SalaryCard from '../Dashboard/SalaryCard'
 
 // 🔹 Reusable StatusCard component
 const StatusCard = ({ title, subtitle, icon }) => {

@@ -44,4 +44,4 @@ const SalaryCard = ({ employee }) => {
 };
 
 
-export default SalaryCard
+export default SalaryCard;
