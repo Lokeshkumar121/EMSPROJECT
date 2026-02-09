@@ -21,9 +21,6 @@ const Admindashboard = ({ changeUser, user }) => {
     if (data.status === "failed") sound = "/err.mp3";
 
     new Audio(sound).play();
-     if (data.employeeId === loggedInUser._id) {
-      toast.success(`Salary Updated: ₹ ${data.todaySalary}`);
-    }
 
     // 🎨 Toast based on status
     if (data.status === "failed") {
@@ -53,7 +50,7 @@ const Admindashboard = ({ changeUser, user }) => {
   return (
     <div className='min-h-screen w-full p-4 sm:p-7 bg-[#1c1c1c] text-white flex flex-col gap-6'>
       <Header changeUser={changeUser} user={user} />
-      
+       <SalaryCard employee={employee} />
 
       {/* Top Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
