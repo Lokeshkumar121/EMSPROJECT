@@ -7,9 +7,29 @@ import RegistrationForm from "../Auth/RegistrationForm";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import socket from "../../socket";
+import { API_BASE } from "../../config/api";
+import AdminSalaryAnalytics from "../../components/AdminSalaryAnalytics";
+
 
 const Admindashboard = ({ changeUser, user }) => {
   const [showAddForm, setShowAddForm] = useState(false);
+  const [analytics, setAnalytics] = useState(null);
+
+  useEffect(() => {
+  const fetchAnalytics = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/analytics/salary`);
+      const data = await res.json();
+      setAnalytics(data);
+    } catch (err) {
+      console.error("Analytics fetch failed", err);
+    }
+  };
+
+  fetchAnalytics();
+}, []);
+
+
  useEffect(() => {
   // const socket = io("http://localhost:8080");
 
@@ -52,8 +72,7 @@ const Admindashboard = ({ changeUser, user }) => {
   return (
     <div className='min-h-screen w-full p-4 sm:p-7 bg-[#1c1c1c] text-white flex flex-col gap-6'>
       <Header changeUser={changeUser} user={user} />
-       
-
+       <AdminSalaryAnalytics analytics={analytics} />
       {/* Top Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         {/* Add Employee Button */}

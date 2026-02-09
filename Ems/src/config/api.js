@@ -1,0 +1,1 @@
+export const API_BASE = "https://ems-backend-jy3w.onrender.com/api";
