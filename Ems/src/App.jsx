@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from "react";
-import {  Routes, Route } from "react-router-dom";
+import {  Routes, Route , Navigate} from "react-router-dom";
 import Login from "./components/Auth/Login";
 import Admindashboard from "./components/Dashboard/Admindashboard";
 import EmployeeDashboard from "./components/Dashboard/EmployeeDashboard";
@@ -90,26 +90,21 @@ useEffect(() => {
 
       <Routes>
 
-        {/* PUBLIC */}
+        {/* HOME */}
         <Route
           path="/"
           element={
             !user ? (
               showLogin ? (
-                <Login
-                  setUser={(emp) => {
-                    setUser(emp);
-                    setLoggedInEmployee(emp);
-                    setShowLogin(false);
-                  }}
-                  onBack={() => setShowLogin(false)}
-                />
+                <Login setUser={setUser} />
               ) : (
                 <Home onLoginClick={() => setShowLogin(true)} />
               )
-            ) : <Navigate
+            ) : (
+              <Navigate
                 to={user.role === "admin" ? "/admin" : "/employee/dashboard"}
               />
+            )
           }
         />
 
@@ -119,7 +114,9 @@ useEffect(() => {
           element={
             user?.role === "admin" ? (
               <Admindashboard changeUser={logout} user={user} />
-            ) :  <Navigate to="/" />
+            ) : (
+              <Navigate to="/" />
+            )
           }
         />
 
@@ -127,20 +124,16 @@ useEffect(() => {
         <Route
           path="/employee/dashboard"
           element={
-            user?.role === "employee" && loggedInEmployee ? (
-              <EmployeeDashboard
-                changeUser={logout}
-                user={loggedInEmployee}
-              />
-            ) : <Navigate to="/" />
+            user?.role === "employee" ? (
+              <EmployeeDashboard changeUser={logout} user={user} />
+            ) : (
+              <Navigate to="/" />
+            )
           }
         />
 
-        {/* EMPLOYEE SALARY PAGE */}
-        <Route
-          path="/employee/:id"
-          element={<EmployeeSalary />}
-        />
+        {/* EMPLOYEE SALARY GRAPH */}
+        <Route path="/employee/:id" element={<EmployeeSalary />} />
 
       </Routes>
     </>

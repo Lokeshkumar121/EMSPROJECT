@@ -58,7 +58,10 @@ setUser(empUser);
   } catch (err) {
     // 🔹 Check for hard-coded admin
       if (email === "admin@me.com" && password === "123") {
-        const adminUser = { role: "admin", name: "Admin" };
+        const adminUser = { _id: "admin",
+    role: "admin",
+    name: "Admin",
+    email: "admin@me.com" };
         localStorage.setItem("loggedInUser", JSON.stringify(adminUser));
         setUser(adminUser);
         toast.success("Admin Login Successful");
