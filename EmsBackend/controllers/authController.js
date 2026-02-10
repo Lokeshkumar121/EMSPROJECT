@@ -7,6 +7,9 @@ export const loginUser = async (req, res) => {
     const user = await Employee.findOne({ email, password });
     if (!user) return res.status(401).json({ message: "Invalid credentials" });
      // Remove password before sending user data
+      if (user.password !== password) {
+    return res.status(401).json({ message: "Invalid email or password" });
+  }
     const { password: pwd, ...userData } = user._doc;
 
     res.status(200).json(userData);

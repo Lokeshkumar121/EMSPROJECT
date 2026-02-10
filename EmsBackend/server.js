@@ -19,16 +19,20 @@ const app = express();
 // ✅ MIDDLEWARE
 const allowedOrigins = ["https://emsproject-lh2b.onrender.com", "http://localhost:5173"];
 
+// app.use(cors({
+//   origin:function(origin, callback){
+//     if(!origin) return callback(null, true); // for mobile apps / postman
+//     if(allowedOrigins.indexOf(origin) === -1){
+//       const msg = 'CORS policy: This origin is not allowed';
+//       return callback(new Error(msg), false);
+//     }
+//     return callback(null, true);
+//   },
+//   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+//   credentials: true
+// }));
 app.use(cors({
-  origin:function(origin, callback){
-    if(!origin) return callback(null, true); // for mobile apps / postman
-    if(allowedOrigins.indexOf(origin) === -1){
-      const msg = 'CORS policy: This origin is not allowed';
-      return callback(new Error(msg), false);
-    }
-    return callback(null, true);
-  },
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+  origin: true, // allow all origins (DEV + Render safe)
   credentials: true
 }));
 app.use(express.json());
