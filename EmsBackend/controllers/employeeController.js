@@ -82,7 +82,10 @@ export const addTaskToEmployee = async (req, res) => {
 
     // Add task
     employee.tasks.push({
-  ...task,
+   title: task.title,
+      description: task.description,
+      category: task.category,
+      expectedTime: task.expectedTime,
   newTask: true,
   active: false,
   complete: false,
@@ -100,7 +103,7 @@ employee.taskCounts.newTask++;
     await employee.save();
       // 🔔 Emit notification to employee in real-time
     io.to(employeeId).emit("newTask", {
-      taskId: task._id || employee.tasks.length - 1,
+      // taskId: task._id || employee.tasks.length - 1,
       title: task.title,
       description: task.description,
     });
@@ -127,6 +130,7 @@ export const updateTaskStatus = async (req, res) => {
       employee.salaryStats.bonusPercent = 0;
       employee.salaryStats.penaltyPercent = 0;
       employee.todaySalary = employee.baseSalaryPerDay;
+       employee.salaryStats.lastResetDate = new Date();
     }
     const task = employee.tasks[taskIndex];
     if (!task) {
