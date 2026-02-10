@@ -76,17 +76,20 @@ export const deleteEmployee = async (req, res) => {
 // 🔹 Add task to an employee
 export const addTaskToEmployee = async (req, res) => {
   try {
-    console.log("BODY =>", req.body);
     const { employeeId, task } = req.body;
-        console.log("EMP ID =>", employeeId);
-
-    console.log("TASK =>", task);
     const employee = await Employee.findById(employeeId);
-    console.log("EMPLOYEE FOUND =>", employee);
     if (!employee) return res.status(404).json({ message: "Employee not found" });
 
     // Add task
-    employee.tasks.push(task);
+    employee.tasks.push({
+  ...task,
+  newTask: true,
+  active: false,
+  complete: false,
+  failed: false,
+  assignedAt: new Date()
+});
+employee.taskCounts.newTask++;
 
     // Update taskCounts automatically
     // if (task.newTask) employee.taskCounts.newTask += 1;
