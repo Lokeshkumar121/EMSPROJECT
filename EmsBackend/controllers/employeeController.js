@@ -209,6 +209,20 @@ export const updateTaskStatus = async (req, res) => {
     // if (task.active) employee.taskCounts.active++;
     // if (task.complete) employee.taskCounts.complete++;
     // if (task.failed) employee.taskCounts.failed++;
+    const today = new Date().toDateString();
+
+const alreadySaved = employee.salaryHistory.find(
+  (s) => new Date(s.date).toDateString() === today
+);
+
+if (!alreadySaved) {
+  employee.salaryHistory.push({
+    date: new Date(),
+    salary: employee.todaySalary
+  });
+} else {
+  alreadySaved.salary = employee.todaySalary;
+}
 
     await employee.save();
      io.emit("taskStatusUpdate", {

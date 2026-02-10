@@ -5,7 +5,8 @@ import EmployeeDashboard from "./components/Dashboard/EmployeeDashboard";
 import Home from "./pages/Home";
 import { Authcontext } from "./context/AuthProvider";
 import axios from 'axios';
-
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import EmployeeSalary from "./pages/EmployeeSalary";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -34,49 +35,49 @@ useEffect(() => {
   }
 }, []); // run only once on mount
 
-  const handleLogin = (email, password) => {
-    // ADMIN
-    if (email === "admin@me.com" && password === "123") {
-      const adminUser = {
-    role: "admin",
-    name: "Admin",
-    email: "admin@me.com",
-  };
-      localStorage.setItem(
-        "loggedInUser",
-        JSON.stringify(adminUser)
-      );
-      setUser(adminUser);
-      return true;
-    }
+  // const handleLogin = (email, password) => {
+  //   // ADMIN
+  //   if (email === "admin@me.com" && password === "123") {
+  //     const adminUser = {
+  //   role: "admin",
+  //   name: "Admin",
+  //   email: "admin@me.com",
+  // };
+  //     localStorage.setItem(
+  //       "loggedInUser",
+  //       JSON.stringify(adminUser)
+  //     );
+  //     setUser(adminUser);
+  //     return true;
+  //   }
 
-    // EMPLOYEE
-    if (userData) {
-      const emp = userData.find(
-        e => e.email === email && e.password === password
-      );
+  //   // EMPLOYEE
+  //   if (userData) {
+  //     const emp = userData.find(
+  //       e => e.email === email && e.password === password
+  //     );
 
-      if (emp) {
+  //     if (emp) {
 
-         const empUser = {
-    role: "employee",
-    email: emp.email,
-    name: emp.firstName
-  };
-        localStorage.setItem(
-          "loggedInUser",
-          JSON.stringify(
-            empUser
-          )
-        );
-        setUser(emp);
-        setLoggedInEmployee(emp);
-        return true;
-      }
-    }
+  //        const empUser = {
+  //   role: "employee",
+  //   email: emp.email,
+  //   name: emp.firstName
+  // };
+  //       localStorage.setItem(
+  //         "loggedInUser",
+  //         JSON.stringify(
+  //           empUser
+  //         )
+  //       );
+  //       setUser(emp);
+  //       setLoggedInEmployee(emp);
+  //       return true;
+  //     }
+  //   }
 
-    return false;
-  };
+  //   return false;
+  // };
 
   const logout = () => {
     localStorage.removeItem("loggedInUser");
@@ -121,6 +122,12 @@ useEffect(() => {
           user={loggedInEmployee}
         />
       )}
+
+
+  <Routes>
+    <Route path="/employee/:id" element={<EmployeeSalary />} />
+  </Routes>
+
     </>
   );
 };

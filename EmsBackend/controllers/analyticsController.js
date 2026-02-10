@@ -24,3 +24,21 @@ export const getSalaryAnalytics = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+export const getEmployeeSalaryGraph = async (req, res) => {
+  try {
+    const employee = await Employee.findById(req.params.employeeId)
+      .select("firstName lastName salaryHistory");
+
+    if (!employee) {
+      return res.status(404).json({ message: "Employee not found" });
+    }
+
+    res.json({
+      name: `${employee.firstName} ${employee.lastName}`,
+      history: employee.salaryHistory
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};

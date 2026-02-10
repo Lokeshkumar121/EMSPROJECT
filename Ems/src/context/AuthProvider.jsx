@@ -11,7 +11,7 @@ const API = "https://ems-backend-jy3w.onrender.com/api/employees";
 const AuthProvider = ({ children }) => {
   // 🔹 All employees
   const [userData, setUserData] = useState([]);
-  const [loggedInUser, setLoggedInUser] = useState(null);
+  // const [loggedInUser, setLoggedInUser] = useState(null);
 
 
 
@@ -106,9 +106,9 @@ console.log(deleteEmployee)
     <Authcontext.Provider
       value={{
         userData,
-    loggedInUser,
+
     setUserData,
-    setLoggedInUser,
+    
     addTaskToEmployee,
     updateTaskStatus,
     deleteEmployee

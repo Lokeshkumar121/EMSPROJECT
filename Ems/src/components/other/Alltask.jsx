@@ -1,10 +1,13 @@
 import React, { useContext } from 'react'
 import { Authcontext } from '../../context/AuthProvider'
+import { useNavigate } from "react-router-dom";
+
 // import { toast } from "react-toastify";
 // import "react-toastify/dist/ReactToastify.css";
 
 const Alltask = () => {
   const { userData , deleteEmployee} = useContext(Authcontext);
+  const navigate = useNavigate();
 
   // 🔹 Filter only employees
   //  const employeesOnly = userData.filter(emp => emp.role === "employee");
@@ -37,7 +40,9 @@ const Alltask = () => {
             key={index}
             className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-4 py-2 rounded-lg mb-2 bg-[#181818] border border-gray-800 hover:bg-[#1f1f1f] transition"
           >
-            <span className="w-full sm:w-1/5 text-white font-medium tracking-wide mb-1 sm:mb-0">
+            <span 
+             onClick={() => navigate(`/employee/${elem._id}`)}
+            className="w-full sm:w-1/5 text-white font-medium tracking-wide mb-1 sm:mb-0">
               {elem.firstName} {elem.lastName}
             </span>
 

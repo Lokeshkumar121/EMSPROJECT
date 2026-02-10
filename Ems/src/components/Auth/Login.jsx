@@ -29,20 +29,22 @@ const Login = ({ setUser }) => {
     });
 
     // 🔹 Backend returned user data
-    const employeeData = res.data;
+    const emp = res.data;
 
 
     // 🔹 Add role manually for frontend
-    const userWithRole = { ...employeeData, role: "employee" };
+    
+const empUser = {
+  _id: emp._id,
+  role: emp.role,        // backend se
+  email: emp.email,
+  name: emp.firstName,
+};
 
      // ✅ MOST IMPORTANT (MISSING LINE)
-    localStorage.setItem(
-      "loggedInUser",
-      JSON.stringify(userWithRole)
-    );
-
-    // 🔹 Update App state
-    setUser(userWithRole);
+   
+    localStorage.setItem("loggedInUser", JSON.stringify(empUser));
+setUser(empUser);
 
     toast.success("Login Successful");
 
@@ -56,7 +58,7 @@ const Login = ({ setUser }) => {
   } catch (err) {
     // 🔹 Check for hard-coded admin
       if (email === "admin@me.com" && password === "123") {
-        const adminUser = { role: "admin", name: "Admin", email: "admin@me.com" };
+        const adminUser = { role: "admin", name: "Admin" };
         localStorage.setItem("loggedInUser", JSON.stringify(adminUser));
         setUser(adminUser);
         toast.success("Admin Login Successful");

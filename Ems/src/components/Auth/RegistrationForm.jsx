@@ -30,7 +30,7 @@ const RegistrationForm = ({ onClose }) => {
 
     try {
       // 🔹 Server pe add
-      await axios.post("https://ems-backend-jy3w.onrender.com/api/employees", newEmployee);
+      const res = await axios.post("https://ems-backend-jy3w.onrender.com/api/employees", newEmployee);
 
       // Backend se jo employee create hua hai uska data use karo
 setUserData(prev => [...prev, res.data]);

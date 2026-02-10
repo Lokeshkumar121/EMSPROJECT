@@ -43,6 +43,8 @@ app.use((req, res, next) => {
 app.use("/api/employees", employeeRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/analytics", analyticsRoutes);
+
+
 console.log("Analytics routes loaded");
 
 

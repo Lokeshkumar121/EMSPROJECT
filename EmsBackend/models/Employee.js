@@ -49,6 +49,12 @@ const employeeSchema = new mongoose.Schema({
     bonusPercent: { type: Number, default: 0 },
     penaltyPercent: { type: Number, default: 0 },
   },
+  salaryHistory: [
+  {
+    date: { type: Date, required: true },
+    salary: { type: Number, required: true }
+  }
+],
 } , { timestamps: true });
 
 const Employee = mongoose.model("Employee", employeeSchema);
