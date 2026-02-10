@@ -40,13 +40,13 @@ const Alltask = () => {
             key={index}
             className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-4 py-2 rounded-lg mb-2 bg-[#181818] border border-gray-800 hover:bg-[#1f1f1f] transition"
           >
-            <span
-              type="button"
-              onClick={() => navigate(`/employee/${elem._id}`)}
-              className="cursor-pointer hover:text-emerald-400"
-            >
-              {elem.firstName} {elem.lastName}
-            </span>
+            <button
+  type="button"
+  onClick={() => navigate(`/employee/${elem._id}`)}
+  className="w-full sm:w-1/5 text-left text-white hover:text-emerald-400 font-medium cursor-pointer"
+>
+  {elem.firstName} {elem.lastName}
+</button>
 
             <span className="w-full sm:w-1/5 text-blue-400 font-semibold text-center mb-1 sm:mb-0">
               {elem.taskCounts.newTask}
