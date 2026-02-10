@@ -37,12 +37,12 @@ const Alltask = () => {
       <div className="overflow-y-auto h-56 min-w-[600px] p-2">
         {employeesOnly.map((elem, index) => (
           <div
-            key={index}
+            key={elem._id}
             className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-4 py-2 rounded-lg mb-2 bg-[#181818] border border-gray-800 hover:bg-[#1f1f1f] transition"
           >
             <button
   type="button"
-  onClick={() => navigate(`/employee/${elem._id}`)}
+  onClick={() => { console.log("ID:", elem._id); navigate(`/employee/${elem._id}`)}}
   className="w-full sm:w-1/5 text-left text-white hover:text-emerald-400 font-medium cursor-pointer"
 >
   {elem.firstName} {elem.lastName}
