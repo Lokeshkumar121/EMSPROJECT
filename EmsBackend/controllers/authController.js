@@ -8,7 +8,15 @@ export const loginUser = async (req, res) => {
     if (!user) return res.status(401).json({ message: "Invalid credentials" });
      // Remove password before sending user data
       if (user.password !== password) {
-    return res.status(401).json({ message: "Invalid email or password" });
+    
+    res.status(200).json({
+      _id: user._id,
+      email: user.email,
+      role: user.role,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      name: `${user.firstName} ${user.lastName}`, // ✅ IMPORTANT
+    });
   }
     const { password: pwd, ...userData } = user._doc;
 

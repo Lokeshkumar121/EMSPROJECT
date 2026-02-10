@@ -2,14 +2,16 @@ import React from "react";
 import { toast } from "react-toastify";
 import LiveDate from "../../livedate/LiveDate";
 
-const Header = ({ changeUser , user}) => {
+const Header = ({ changeUser, user }) => {
 
   const loggedInUser = JSON.parse(
     localStorage.getItem("loggedInUser") || "{}"
   );
+  console.log("HEADER user prop:", user);
+console.log("HEADER localStorage user:", loggedInUser);
 
   const logoutHandler = () => {
-     // 1️⃣ Pehle toast
+    // 1️⃣ Pehle toast
     toast.success("Logout Successfully 👋", {
       autoClose: 2000,
     });
@@ -25,8 +27,8 @@ const Header = ({ changeUser , user}) => {
   if (!user?.role) return null;
 
   return (
-     <header className="w-full flex flex-col md:flex-row items-center justify-between px-4 sm:px-6 md:px-8 py-4 bg-[#0f0f0f] border-b border-gray-800 gap-4 md:gap-0">
-      
+    <header className="w-full flex flex-col md:flex-row items-center justify-between px-4 sm:px-6 md:px-8 py-4 bg-[#0f0f0f] border-b border-gray-800 gap-4 md:gap-0">
+
       {/* LEFT */}
       <div className="text-center md:text-left">
         <h1 className="text-lg sm:text-xl font-semibold text-white">
@@ -35,8 +37,8 @@ const Header = ({ changeUser , user}) => {
         <p className="text-sm text-gray-400 mt-1">
           Welcome,{" "}
           <span className="text-emerald-400 font-medium">
-            {user.name || `${user.firstName || ""} ${user.lastName || "kumardvnvlnvdfln"}` || "User"}
-          </span>
+   {user.firstName} {user.lastName}
+</span>
         </p>
       </div>
 

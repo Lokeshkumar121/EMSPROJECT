@@ -38,7 +38,8 @@ const empUser = {
   _id: emp._id,
   role: emp.role,        // backend se
   email: emp.email,
-  name: emp.firstName,
+  firstName: emp.firstName,
+  lastName: emp.lastName,
 };
 
      // ✅ MOST IMPORTANT (MISSING LINE)
