@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from "react";
-import "./utils/chartSetup";
+
 import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./components/Auth/Login";
 import Admindashboard from "./components/Dashboard/Admindashboard";
