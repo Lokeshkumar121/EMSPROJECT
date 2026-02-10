@@ -42,7 +42,7 @@ const Alltask = () => {
           >
             <span 
              onClick={() => navigate(`/employee/${elem._id}`)}
-            className="w-full sm:w-1/5 text-white font-medium tracking-wide mb-1 sm:mb-0">
+            className="w-full sm:w-1/5 text-white font-medium tracking-wide mb-1 sm:mb-0 cursor-pointer">
               {elem.firstName} {elem.lastName}
             </span>
 
