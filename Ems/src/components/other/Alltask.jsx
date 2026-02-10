@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 // import "react-toastify/dist/ReactToastify.css";
 
 const Alltask = () => {
-  const { userData , deleteEmployee} = useContext(Authcontext);
+  const { userData, deleteEmployee } = useContext(Authcontext);
   const navigate = useNavigate();
 
   // 🔹 Filter only employees
@@ -39,14 +39,14 @@ const Alltask = () => {
           <div
             key={index}
             className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-4 py-2 rounded-lg mb-2 bg-[#181818] border border-gray-800 hover:bg-[#1f1f1f] transition"
-          > 
-            <span 
-
-             onClick={() => { console.log("CLICKED", elem._id); navigate(`/employee/${elem._id}`)}}
-            className="w-full sm:w-1/5 text-white cursor-pointer hover:text-emerald-400
- font-medium tracking-wide mb-1 sm:mb-0 ">
+          >
+            <button
+              type="button"
+              onClick={() => navigate(`/employee/${elem._id}`)}
+              className="w-full sm:w-1/5 text-left text-white hover:text-emerald-400 font-medium cursor-pointer"
+            >
               {elem.firstName} {elem.lastName}
-            </span>
+            </button>
 
             <span className="w-full sm:w-1/5 text-blue-400 font-semibold text-center mb-1 sm:mb-0">
               {elem.taskCounts.newTask}
@@ -63,15 +63,15 @@ const Alltask = () => {
             <span className="w-full sm:w-1/5 text-red-400 font-semibold text-center mb-1 sm:mb-0">
               {elem.taskCounts.failed}
             </span>
-          <span className="w-full sm:w-1/5 flex justify-center">
-   <button
+            <span className="w-full sm:w-1/5 flex justify-center">
+              <button
                 onClick={() => deleteEmployee(elem._id)}
                 className="bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-semibold px-3 sm:px-4 py-2 rounded-lg shadow-lg transition-all duration-200 ease-in-out flex items-center justify-center gap-1 w-full sm:w-auto"
                 title="Delete"
               >
                 ❌
               </button>
-</span>
+            </span>
 
 
           </div>

@@ -1,12 +1,11 @@
 import { useState, useEffect, useContext } from "react";
+import {  Routes, Route } from "react-router-dom";
 import Login from "./components/Auth/Login";
 import Admindashboard from "./components/Dashboard/Admindashboard";
 import EmployeeDashboard from "./components/Dashboard/EmployeeDashboard";
 import Home from "./pages/Home";
-import { Authcontext } from "./context/AuthProvider";
-import axios from 'axios';
-import { BrowserRouter, Routes, Route } from "react-router-dom";
 import EmployeeSalary from "./pages/EmployeeSalary";
+import { Authcontext } from "./context/AuthProvider";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -89,45 +88,61 @@ useEffect(() => {
     <>
       <ToastContainer />
 
-      {/* PUBLIC */}
-      {!user && !showLogin && (
-        <Home onLoginClick={() => setShowLogin(true)} />
-      )}
+      <Routes>
 
-      {/* LOGIN */}
-      {!user && showLogin && (
-        <Login
-        setUser={(loggedInEmployee) => {
-          setUser(loggedInEmployee);   // user object update
-      setLoggedInEmployee(loggedInEmployee); // dashboard ke liye
-      setShowLogin(false);
-        }}
-        
-          handleLogin={(email, password) => {
-            const ok = handleLogin(email, password);
-            if (ok) setShowLogin(false);
-            return ok;
-          }}
-          onBack={() => setShowLogin(false)}
+        {/* PUBLIC */}
+        <Route
+          path="/"
+          element={
+            !user ? (
+              showLogin ? (
+                <Login
+                  setUser={(emp) => {
+                    setUser(emp);
+                    setLoggedInEmployee(emp);
+                    setShowLogin(false);
+                  }}
+                  onBack={() => setShowLogin(false)}
+                />
+              ) : (
+                <Home onLoginClick={() => setShowLogin(true)} />
+              )
+            ) : <Navigate
+                to={user.role === "admin" ? "/admin" : "/employee/dashboard"}
+              />
+          }
         />
-      )}
 
-      {/* ADMIN */}
-      {user?.role === "admin" && <Admindashboard changeUser={logout} user={user} />}
-
-      {/* EMPLOYEE */}
-      {user?.role === "employee" && loggedInEmployee && (
-        <EmployeeDashboard
-          changeUser={logout}
-          user={loggedInEmployee}
+        {/* ADMIN */}
+        <Route
+          path="/admin"
+          element={
+            user?.role === "admin" ? (
+              <Admindashboard changeUser={logout} user={user} />
+            ) :  <Navigate to="/" />
+          }
         />
-      )}
 
+        {/* EMPLOYEE DASHBOARD */}
+        <Route
+          path="/employee/dashboard"
+          element={
+            user?.role === "employee" && loggedInEmployee ? (
+              <EmployeeDashboard
+                changeUser={logout}
+                user={loggedInEmployee}
+              />
+            ) : <Navigate to="/" />
+          }
+        />
 
-  <Routes>
-    <Route path="/employee/:id" element={<EmployeeSalary />} />
-  </Routes>
+        {/* EMPLOYEE SALARY PAGE */}
+        <Route
+          path="/employee/:id"
+          element={<EmployeeSalary />}
+        />
 
+      </Routes>
     </>
   );
 };
