@@ -35,7 +35,7 @@ const Header = ({ changeUser , user}) => {
         <p className="text-sm text-gray-400 mt-1">
           Welcome,{" "}
           <span className="text-emerald-400 font-medium">
-            {user.name || `${user.firstName || ""} ${user.lastName || ""}` || "User"}
+            {user.name || `${user.firstName || ""} ${user.lastName || "kumardvnvlnvdfln"}` || "User"}
           </span>
         </p>
       </div>
