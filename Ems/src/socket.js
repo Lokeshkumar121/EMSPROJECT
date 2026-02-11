@@ -1,8 +1,11 @@
 import { io } from "socket.io-client";
 
-const socket = io("https://ems-backend-jy3w.onrender.com/", {
-  withCredentials: true,
-  transports: ["websocket"]
+const SOCKET_URL = "https://ems-backend-jy3w.onrender.com/";
+
+const socket = io(SOCKET_URL, {
+  withCredentials : true,
+  transports: ["websocket"],
+  autoConnect: true,
 });
 
 export default socket;

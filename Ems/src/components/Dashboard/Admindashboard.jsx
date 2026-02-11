@@ -32,10 +32,13 @@ const Admindashboard = ({ changeUser, user }) => {
 
  useEffect(() => {
   // const socket = io("http://localhost:8080");
+    if (!socket) return; // ✅ SAFETY
 
   socket.on("taskStatusUpdate", (data) => {
     // 🔊 Sound based on status
     let sound = "/notification.mp3";
+     console.log("📡 Task updated → refetching");
+    window.dispatchEvent(new Event("refreshTasks"));
 
     if (data.status === "complete") sound = "/succes.mp3";
     if (data.status === "failed") sound = "/err.mp3";
