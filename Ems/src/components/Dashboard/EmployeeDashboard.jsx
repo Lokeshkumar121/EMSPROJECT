@@ -12,6 +12,8 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import SalaryCard from '../Dashboard/SalaryCard'
 
+
+
 // 🔹 Reusable StatusCard component
 const StatusCard = ({ title, subtitle, icon }) => {
   return (
@@ -25,7 +27,9 @@ const StatusCard = ({ title, subtitle, icon }) => {
   )
 }
 const EmployeeDashboard = ({ changeUser , user }) => {
-  const {userData} = useContext(Authcontext)
+  // const {userData} = useContext(Authcontext)
+
+const { userData, fetchEmployees } = useContext(Authcontext);
 
   // read only
   const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'))
@@ -50,11 +54,13 @@ const EmployeeDashboard = ({ changeUser , user }) => {
         pauseOnHover: true,
         draggable: true,
       });
+      fetchEmployees(); // ✅ REFRESH DATA
       console.log("Notification:", data);
     });
 
     return () => {
       socket.off("newTask");
+      socket.off("taskStatusUpdate");
     };
   }, [loggedInUser]);
 
