@@ -61,7 +61,7 @@ setUser(empUser);
       if (email === "admin@me.com" && password === "123") {
         const adminUser = { _id: "admin",
     role: "admin",
-    name: "Admin",
+    firstName: "Admin",
     email: "admin@me.com" };
         localStorage.setItem("loggedInUser", JSON.stringify(adminUser));
         setUser(adminUser);
