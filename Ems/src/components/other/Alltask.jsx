@@ -1,6 +1,7 @@
 import React, { useContext, useEffect } from 'react'
 import { Authcontext } from '../../context/AuthProvider'
 import { useNavigate } from "react-router-dom";
+import socket from "../../socket"
 
 // import { toast } from "react-toastify";
 // import "react-toastify/dist/ReactToastify.css";
@@ -8,6 +9,18 @@ import { useNavigate } from "react-router-dom";
 const Alltask = () => {
   const { userData, deleteEmployee , fetchEmployees} = useContext(Authcontext);
   const navigate = useNavigate();
+  useEffect(() => {
+  const handleUpdate = () => {
+    fetchEmployees();   // 🔥 real-time refresh
+  };
+
+  socket.on("taskStatusUpdate", handleUpdate);
+
+  return () => {
+    socket.off("taskStatusUpdate", handleUpdate);
+  };
+}, [fetchEmployees]);
+
   useEffect(() => {
   socket.on("taskStatusUpdate", () => {
     fetchEmployees(); // 🔥 REAL-TIME REFRESH
