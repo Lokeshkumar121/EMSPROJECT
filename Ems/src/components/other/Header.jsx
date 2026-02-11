@@ -36,9 +36,14 @@ console.log("HEADER localStorage user:", loggedInUser);
         </h1>
         <p className="text-sm text-gray-400 mt-1">
           Welcome,{" "}
-          <span className="text-emerald-400 font-medium">
+          {/* <span className="text-emerald-400 font-medium">
    {user.firstName} {user.lastName}
-</span>
+</span> */}
+  <span className="text-emerald-400 font-medium">
+    {user.role === "admin"
+      ? "Admin"
+      : `${user.firstName} ${user.lastName}`}
+  </span>
         </p>
       </div>
 

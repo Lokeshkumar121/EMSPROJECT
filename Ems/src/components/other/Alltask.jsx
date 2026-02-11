@@ -6,8 +6,15 @@ import { useNavigate } from "react-router-dom";
 // import "react-toastify/dist/ReactToastify.css";
 
 const Alltask = () => {
-  const { userData, deleteEmployee } = useContext(Authcontext);
+  const { userData, deleteEmployee , fetchEmployees} = useContext(Authcontext);
   const navigate = useNavigate();
+  useEffect(() => {
+  socket.on("taskStatusUpdate", () => {
+    fetchEmployees(); // 🔥 REAL-TIME REFRESH
+  });
+
+  return () => socket.off("taskStatusUpdate");
+}, []);
 
   // 🔹 Filter only employees
   //  const employeesOnly = userData.filter(emp => emp.role === "employee");
