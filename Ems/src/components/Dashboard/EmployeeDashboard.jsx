@@ -62,7 +62,7 @@ const { userData, fetchEmployees } = useContext(Authcontext);
       socket.off("newTask");
       socket.off("taskStatusUpdate");
     };
-  }, [loggedInUser]);
+  }, [loggedInUser , fetchEmployees]);
 
   // loading state
   if (!userData || userData.length === 0) {
@@ -108,4 +108,4 @@ console.log("All employees:", userData.map(e => e.email));
   )
 }
 
-export default EmployeeDashboard
+export default EmployeeDashboard;
