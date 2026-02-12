@@ -3,7 +3,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { Authcontext } from '../../context/AuthProvider'
 
-const RegistrationForm = ({ onClose }) => {
+const RegistrationForm = ({ onClose , onEmployeeAdded }) => {
   const {userData, setUserData} = useContext(Authcontext); // 🔹 useContext sahi
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -39,6 +39,9 @@ setUserData(prev => {
   return updated;
 });
 
+if (onEmployeeAdded) {
+  onEmployeeAdded();   // 🔥 IMPORTANT
+}
       toast.success("Employee added successfully!");
       setFirstName(""); setLastName(""); setEmail(""); setPassword("");
       onClose();

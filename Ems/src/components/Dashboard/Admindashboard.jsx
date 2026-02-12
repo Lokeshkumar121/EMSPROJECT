@@ -96,7 +96,7 @@ const Admindashboard = ({ changeUser, user }) => {
 
       {/* Registration Form Modal */}
       {showAddForm && (
-        <RegistrationForm onClose={() => setShowAddForm(false)} />
+        <RegistrationForm onClose={() => setShowAddForm(false)}  onEmployeeAdded={fetchAnalytics} />
       )}
 
       {/* Task Management */}
