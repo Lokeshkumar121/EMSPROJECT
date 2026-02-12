@@ -6,7 +6,7 @@ import socket from "../../socket"
 // import { toast } from "react-toastify";
 // import "react-toastify/dist/ReactToastify.css";
 
-const Alltask = () => {
+const Alltask = ({ onEmployeeDeleted }) => {
   const { userData, deleteEmployee , fetchEmployees} = useContext(Authcontext);
   const navigate = useNavigate();
   useEffect(() => {
@@ -85,7 +85,12 @@ const Alltask = () => {
             </span>
             <span className="w-full sm:w-1/5 flex justify-center">
               <button
-                onClick={() => deleteEmployee(elem._id)}
+                onClick={async () => {
+  await deleteEmployee(elem._id);
+  if (onEmployeeDeleted) {
+    onEmployeeDeleted(); // 🔥 refresh analytics
+  }
+}}
                 className="bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-semibold px-3 sm:px-4 py-2 rounded-lg shadow-lg transition-all duration-200 ease-in-out flex items-center justify-center gap-1 w-full sm:w-auto"
                 title="Delete"
               >
@@ -102,3 +107,6 @@ const Alltask = () => {
 }
 
 export default Alltask;
+
+
+

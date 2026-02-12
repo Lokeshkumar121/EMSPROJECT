@@ -91,7 +91,13 @@ const AuthProvider = ({ children }) => {
     await axios.delete(`${API}/${employeeId}`);
 
     // 🔹 Frontend state update
-    setUserData(prev => prev.filter(emp => emp._id !== employeeId));
+    setUserData(prev => 
+      {
+       const updated = prev.filter(emp => emp._id !== employeeId)
+        localStorage.setItem("employees", JSON.stringify(updated));
+        return updated;
+      });
+
 
     toast.success("Employee deleted successfully!");
   } catch (err) {

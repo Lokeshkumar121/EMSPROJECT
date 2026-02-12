@@ -30,6 +30,10 @@ const Admindashboard = ({ changeUser, user }) => {
   fetchAnalytics();
 }, []);
 
+const handleEmployeeDeleted = async () => {
+  await fetchAnalytics();
+};
+
 
 
  useEffect(() => {
@@ -101,7 +105,7 @@ const Admindashboard = ({ changeUser, user }) => {
 
       {/* Task Management */}
       <CreateTask />
-      <Alltask />
+      <Alltask onEmployeeDeleted={handleEmployeeDeleted} />
         
     </div>
   )
