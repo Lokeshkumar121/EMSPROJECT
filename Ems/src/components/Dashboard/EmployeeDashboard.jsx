@@ -57,6 +57,9 @@ const { userData, fetchEmployees } = useContext(Authcontext);
       fetchEmployees(); // ✅ REFRESH DATA
       console.log("Notification:", data);
     });
+     socket.on("taskStatusUpdate", (data) => {
+    fetchEmployees(); // 🔥 THIS WAS MISSING PROPERLY
+  });
 
     return () => {
       socket.off("newTask");
