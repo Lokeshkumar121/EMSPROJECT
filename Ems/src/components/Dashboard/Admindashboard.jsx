@@ -37,6 +37,7 @@ const Admindashboard = ({ changeUser, user }) => {
     if (!socket) return; // ✅ SAFETY
 
   socket.on("taskStatusUpdate", (data) => {
+    console.log("🔥 ADMIN RECEIVED:", data);   // ADD THIS
     // 🔊 Sound based on status
     fetchAnalytics();   
     let sound = "/notification.mp3";
