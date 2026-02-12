@@ -15,7 +15,7 @@ const Admindashboard = ({ changeUser, user }) => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [analytics, setAnalytics] = useState(null);
 
-  useEffect(() => {
+  
   const fetchAnalytics = async () => {
     try {
       const res = await fetch(`${API_BASE}/analytics/salary`);
@@ -26,8 +26,10 @@ const Admindashboard = ({ changeUser, user }) => {
     }
   };
 
+  useEffect(() => {
   fetchAnalytics();
 }, []);
+
 
 
  useEffect(() => {
@@ -36,9 +38,10 @@ const Admindashboard = ({ changeUser, user }) => {
 
   socket.on("taskStatusUpdate", (data) => {
     // 🔊 Sound based on status
+    fetchAnalytics();   
     let sound = "/notification.mp3";
-     console.log("📡 Task updated → refetching");
-    window.dispatchEvent(new Event("refreshTasks"));
+    //  console.log("📡 Task updated → refetching");
+    // window.dispatchEvent(new Event("refreshTasks"));
 
     if (data.status === "complete") sound = "/succes.mp3";
     if (data.status === "failed") sound = "/err.mp3";
