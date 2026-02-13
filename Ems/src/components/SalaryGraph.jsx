@@ -8,9 +8,11 @@ import { API_BASE } from "../config/api";
 export default function SalaryGraph({ employeeId }) {
   const [data, setData] = useState(null);
 
+
   useEffect(() => {
     axios.get(`${API_BASE}/analytics/salary/${employeeId}`)
       .then(res => {
+        console.log("API Response:", res.data); 
         const labels = res.data.history.map(h =>
           new Date(h.date).toLocaleDateString()
         );
