@@ -10,7 +10,8 @@ export default function SalaryGraph({ employeeId }) {
 
 
   useEffect(() => {
-    axios.get(`${API_BASE}/analytics/salary/${employeeId}`)
+    if (!employeeId) return;
+    axios.get(`${API_BASE}/analytics/${employeeId}/salary`)
       .then(res => {
         console.log("API Response:", res.data); 
         const labels = res.data.history.map(h =>
@@ -19,13 +20,16 @@ export default function SalaryGraph({ employeeId }) {
         const salaries = res.data.history.map(h => h.salary);
 
         setData({
-          labels,
-          datasets: [{
-            label: "Daily Salary",
-            data: salaries,
-            borderWidth: 2
-          }]
-        });
+        labels,
+        datasets: [{
+          label: "Daily Salary",
+          data: salaries,
+          borderColor: "rgb(75,192,192)",
+          backgroundColor: "rgba(75,192,192,0.2)",
+          tension: 0.3,
+          borderWidth: 2
+        }]
+      });
       });
   }, [employeeId]);
 
