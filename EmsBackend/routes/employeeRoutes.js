@@ -31,7 +31,16 @@ router.get("/:id/salary", async (req, res) => {
 // 🔹 Monthly Summary
 router.get("/:id/monthly-summary", async (req, res) => {
   try {
-    const employee = await Employee.findById(req.params.id);
+
+    const { id } = req.params;
+    
+
+    // ✅ ID validation
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid Employee ID" });
+    }
+
+     const employee = await Employee.findById(id);
 
     if (!employee) {
       return res.status(404).json({ message: "Employee not found" });
@@ -76,9 +85,16 @@ const totalFailed = monthlyData.reduce(
 // 🔹 Pay Salary
 router.post("/:id/pay-salary", async (req, res) => {
   try {
+     const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid Employee ID" });
+    }
+    
     const { amount } = req.body;
 
-    const employee = await Employee.findById(req.params.id);
+
+    const employee = await Employee.findById(id);
 
     if (!employee) {
       return res.status(404).json({ message: "Employee not found" });
