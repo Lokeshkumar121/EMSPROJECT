@@ -74,10 +74,17 @@ const App = () => {
           }
         />
 
-        <Route path="/employee/:id" element={<EmployeeSalary />} />
+        <Route
+          path="/employee/:id"
+          element={
+            user ? <EmployeeSalary /> : <Navigate to="/" />
+          }
+        />
         <Route
           path="/employee/:id/monthly"
-          element={<MonthlySalary />}
+          element={
+            user ? <MonthlySalary /> : <Navigate to="/" />
+          }
         />
       </Routes>
     </>

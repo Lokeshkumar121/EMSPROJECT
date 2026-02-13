@@ -13,9 +13,12 @@ export default function MonthlySalary() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!id) return;
-    fetchMonthlyData();
-  }, [id]);
+  if (!id) {
+    setLoading(false);
+    return;
+  }
+  fetchMonthlyData();
+}, [id]);
 
   const fetchMonthlyData = async () => {
     try {
