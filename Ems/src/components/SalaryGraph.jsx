@@ -11,7 +11,7 @@ export default function SalaryGraph({ employeeId }) {
 
   useEffect(() => {
     if (!employeeId) return;
-    axios.get(`${API_BASE}/analytics/${employeeId}/salary`)
+     axios.get(`${API_BASE}/employees/${employeeId}/salary`)
       .then(res => {
         console.log("API Response:", res.data); 
         const labels = res.data.history.map(h =>
