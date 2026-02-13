@@ -24,3 +24,8 @@ body{
 .animate-slide-in {
   animation: slideIn 0.4s ease-out;
 }
+
+.inputField::placeholder {
+  color: #6b7280;
+  font-weight: 500;
+}

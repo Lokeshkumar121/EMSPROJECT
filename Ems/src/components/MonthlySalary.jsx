@@ -10,44 +10,34 @@ import {
   LinearScale,
   PointElement,
   Tooltip,
-  Legend
+  Legend,
+  Filler
 } from "chart.js";
 
-ChartJS.register(
-  LineElement,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  Tooltip,
-  Legend
-);
+ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement, Tooltip, Legend, Filler);
 
 export default function MonthlySalary() {
-
-  const { id } = useParams();   // ✅ GET ID FROM URL
+  const { id } = useParams();   
   const [summary, setSummary] = useState(null);
   const [graphData, setGraphData] = useState(null);
   const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-  if (!id) {
-    setLoading(false);
-    return;
-  }
-  fetchMonthlyData();
-}, [id]);
+    if (!id) {
+      setLoading(false);
+      return;
+    }
+    fetchMonthlyData();
+  }, [id]);
 
   const fetchMonthlyData = async () => {
     try {
-      const res = await axios.get(
-        `${API_BASE}/employees/${id}/monthly-summary`
-      );
-       console.log("API RESPONSE:", res.data); 
+      const res = await axios.get(`${API_BASE}/employees/${id}/monthly-summary`);
       setSummary(res.data);
 
       const labels = res.data.monthlyData.map(item =>
-        new Date(item.date).toLocaleDateString()
+        new Date(item.date).toLocaleDateString("en-IN", { day: "numeric", month: "short" })
       );
 
       const salary = res.data.monthlyData.map(item => item.salary);
@@ -58,12 +48,26 @@ export default function MonthlySalary() {
           {
             label: "Monthly Salary Trend",
             data: salary,
-            borderColor: "green",
-            tension: 0.3,
+            borderColor: "#10b981",
+            backgroundColor: function(context) {
+              const chart = context.chart;
+              const {ctx, chartArea} = chart;
+              if (!chartArea) return null;
+              const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+              gradient.addColorStop(0, "rgba(16,185,129,0.1)");
+              gradient.addColorStop(1, "rgba(16,185,129,0.4)");
+              return gradient;
+            },
+            tension: 0.4,
+            fill: true,
+            pointRadius: 5,
+            pointHoverRadius: 7,
+            pointBackgroundColor: "#10b981",
+            pointBorderColor: "#ffffff",
+            pointBorderWidth: 2,
           }
         ]
       });
-
     } catch (err) {
       console.error("Fetch Error:", err);
     } finally {
@@ -73,152 +77,93 @@ export default function MonthlySalary() {
 
   const handlePaySalary = async () => {
     if (!amount) return alert("Enter amount");
-
     try {
-      await axios.post(
-        `${API_BASE}/employees/${id}/pay-salary`,
-        { amount }
-      );
-
+      await axios.post(`${API_BASE}/employees/${id}/pay-salary`, { amount });
       alert("Salary Paid Successfully");
       setAmount("");
       fetchMonthlyData();
-
     } catch (err) {
       console.error("Payment Error:", err);
     }
   };
 
-  if (loading) return <p>Loading...</p>;
-  if (!summary) return <p>No data found</p>;
-  const styles = {
-  container: {
-    padding: "40px",
-    fontFamily: "Arial, sans-serif",
-    background: "#f4f6f9",
-    minHeight: "100vh"
-  },
-  title: {
-    marginBottom: "30px",
-    fontSize: "28px",
-    fontWeight: "bold"
-  },
-  cardContainer: {
-    display: "flex",
-    gap: "20px",
-    marginBottom: "30px",
-    flexWrap: "wrap"
-  },
-  card: {
-    flex: "1",
-    minWidth: "200px",
-    background: "#ffffff",
-    padding: "20px",
-    borderRadius: "12px",
-    boxShadow: "0 4px 10px rgba(0,0,0,0.08)"
-  },
-  amount: {
-    fontSize: "22px",
-    fontWeight: "bold",
-    color: "#2c3e50"
-  },
-  success: {
-    fontSize: "22px",
-    fontWeight: "bold",
-    color: "#27ae60"
-  },
-  danger: {
-    fontSize: "22px",
-    fontWeight: "bold",
-    color: "#e74c3c"
-  },
-  chartCard: {
-    background: "#ffffff",
-    padding: "20px",
-    borderRadius: "12px",
-    boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
-    marginBottom: "30px"
-  },
-  paySection: {
-    background: "#ffffff",
-    padding: "20px",
-    borderRadius: "12px",
-    boxShadow: "0 4px 10px rgba(0,0,0,0.08)"
-  },
-  payBox: {
-    display: "flex",
-    gap: "15px",
-    marginTop: "15px",
-    flexWrap: "wrap"
-  },
-  input: {
-    padding: "10px",
-    fontSize: "16px",
-    borderRadius: "8px",
-    border: "1px solid #ccc",
-    flex: "1",
-    minWidth: "150px"
-  },
-  button: {
-    padding: "10px 20px",
-    fontSize: "16px",
-    borderRadius: "8px",
-    border: "none",
-    backgroundColor: "#3498db",
-    color: "#fff",
-    cursor: "pointer"
-  }
-};
+  if (loading) return <p className="text-white text-center mt-10">Loading...</p>;
+  if (!summary) return <p className="text-white text-center mt-10">No data found</p>;
 
+  return (
+    <div className="p-6 md:p-10 bg-[#111] min-h-screen text-white">
+      <h2 className="text-3xl font-bold mb-6 text-white">Monthly Salary Dashboard</h2>
 
- return (
-  <div style={styles.container}>
-    <h2 style={styles.title}>Monthly Salary Dashboard</h2>
-
-    {/* ===== SUMMARY CARDS ===== */}
-    <div style={styles.cardContainer}>
-      <div style={styles.card}>
-        <h4>Total Salary</h4>
-        <p style={styles.amount}>₹ {summary.totalSalary}</p>
+      {/* ===== SUMMARY CARDS ===== */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+        <div className="bg-[#1f1f1f] p-6 rounded-xl shadow-lg hover:shadow-2xl transition">
+          <h4 className="text-gray-300 text-sm mb-2">Total Salary</h4>
+          <p className="text-2xl font-semibold text-white">₹ {summary.totalSalary}</p>
+        </div>
+        <div className="bg-[#1f1f1f] p-6 rounded-xl shadow-lg hover:shadow-2xl transition">
+          <h4 className="text-gray-300 text-sm mb-2">Completed Tasks</h4>
+          <p className="text-2xl font-semibold text-emerald-400">{summary.totalCompleted}</p>
+        </div>
+        <div className="bg-[#1f1f1f] p-6 rounded-xl shadow-lg hover:shadow-2xl transition">
+          <h4 className="text-gray-300 text-sm mb-2">Failed Tasks</h4>
+          <p className="text-2xl font-semibold text-red-500">{summary.totalFailed}</p>
+        </div>
       </div>
 
-      <div style={styles.card}>
-        <h4>Completed Tasks</h4>
-        <p style={styles.success}>{summary.totalCompleted}</p>
-      </div>
+      {/* ===== PREMIUM GRAPH ===== */}
+      {graphData && (
+        <div className="bg-[#1f1f1f] p-6 rounded-xl shadow-lg hover:shadow-2xl transition mb-8">
+          <Line 
+            data={graphData} 
+            options={{
+              responsive: true,
+              plugins: {
+                legend: { 
+                  labels: { color: "#ffffff", font: { size: 14 } } 
+                },
+                tooltip: {
+                  backgroundColor: "#1f1f1f",
+                  titleColor: "#10b981",
+                  bodyColor: "#ffffff",
+                  borderColor: "#10b981",
+                  borderWidth: 1,
+                  padding: 10,
+                }
+              },
+              scales: {
+                x: {
+                  ticks: { color: "#ffffff", font: { size: 12 } },
+                  grid: { color: "rgba(255,255,255,0.1)" }
+                },
+                y: {
+                  ticks: { color: "#ffffff", font: { size: 12 } },
+                  grid: { color: "rgba(255,255,255,0.1)" }
+                }
+              }
+            }} 
+          />
+        </div>
+      )}
 
-      <div style={styles.card}>
-        <h4>Failed Tasks</h4>
-        <p style={styles.danger}>{summary.totalFailed}</p>
+      {/* ===== PAY SALARY ===== */}
+      <div className="bg-[#1f1f1f] p-6 rounded-xl shadow-lg hover:shadow-2xl transition max-w-md">
+        <h3 className="text-xl font-semibold mb-4 text-white">Pay Salary</h3>
+        <div className="flex items-center gap-4">
+          <input
+            type="number"
+            placeholder="Enter amount"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            className="flex-1 p-3 rounded-lg bg-[#2a2a2a] text-white placeholder-gray-400 outline-none focus:ring-2 focus:ring-green-500 transition"
+          />
+          <button
+            onClick={handlePaySalary}
+            className="bg-green-500 hover:bg-green-600 text-white font-semibold px-5 py-3 rounded-lg transition"
+          >
+            Pay
+          </button>
+        </div>
       </div>
     </div>
-
-    {/* ===== GRAPH SECTION ===== */}
-    {graphData && (
-      <div style={styles.chartCard}>
-        <Line data={graphData} />
-      </div>
-    )}
-
-    {/* ===== PAY SALARY SECTION ===== */}
-    <div style={styles.paySection}>
-      <h3>Pay Salary</h3>
-
-      <div style={styles.payBox}>
-        <input
-          type="number"
-          placeholder="Enter amount"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          style={styles.input}
-        />
-
-        <button onClick={handlePaySalary} style={styles.button}>
-          Pay Salary
-        </button>
-      </div>
-    </div>
-  </div>
-);
-
+  );
 }
