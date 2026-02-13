@@ -25,7 +25,7 @@ export default function MonthlySalary() {
       const res = await axios.get(
         `${API_BASE}/employees/${id}/monthly-summary`
       );
-
+       console.log("API RESPONSE:", res.data); 
       setSummary(res.data);
 
       const labels = res.data.monthlyData.map(item =>

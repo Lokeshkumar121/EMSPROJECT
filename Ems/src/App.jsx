@@ -9,7 +9,7 @@ import EmployeeSalary from "./pages/EmployeeSalary";
 import { Authcontext } from "./context/AuthProvider";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import MonthlySalary from "./components/MonthlyGraph";
+import MonthlySalary from "./components/MonthlySalary";
 
 const App = () => {
   const [user, setUser] = useState(null);

@@ -1,6 +1,9 @@
 import express from "express";
+import mongoose from "mongoose";
 import { getEmployees, addEmployee, updateEmployee, deleteEmployee , addTaskToEmployee, updateTaskStatus } from "../controllers/employeeController.js";
 import Employee from "../models/Employee.js";
+
+
 
 
 const router = express.Router();
@@ -33,7 +36,10 @@ router.get("/:id/monthly-summary", async (req, res) => {
   try {
 
     const { id } = req.params;
-    
+    console.log("Monthly route hit, ID:", id);
+      console.log("Monthly summary route hit");
+    console.log("ID:", req.params.id);
+
 
     // ✅ ID validation
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -45,7 +51,7 @@ router.get("/:id/monthly-summary", async (req, res) => {
     if (!employee) {
       return res.status(404).json({ message: "Employee not found" });
     }
-
+    const salaryHistory = employee.salaryHistory || [];
     const now = new Date();
     const month = now.getMonth();
     const year = now.getFullYear();
@@ -79,9 +85,12 @@ const totalFailed = monthlyData.reduce(
     });
 
   } catch (err) {
+     console.error("MONTHLY ROUTE ERROR:", err);
     res.status(500).json({ message: err.message });
   }
 });
+
+
 // 🔹 Pay Salary
 router.post("/:id/pay-salary", async (req, res) => {
   try {
@@ -99,7 +108,9 @@ router.post("/:id/pay-salary", async (req, res) => {
     if (!employee) {
       return res.status(404).json({ message: "Employee not found" });
     }
-
+    if (!employee.salaryPaidHistory) {
+  employee.salaryPaidHistory = [];
+}
     employee.salaryPaidHistory.push({
       amount,
       date: new Date(),
