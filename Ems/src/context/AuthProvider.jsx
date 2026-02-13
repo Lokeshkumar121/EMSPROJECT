@@ -119,7 +119,7 @@ console.log(deleteEmployee)
     addTaskToEmployee,
     updateTaskStatus,
     deleteEmployee,
-    fetchEmployees
+    
       }}
     >
       {children}
