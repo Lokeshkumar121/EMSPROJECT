@@ -57,6 +57,7 @@ router.get("/:id/monthly-summary", async (req, res) => {
     const year = now.getFullYear();
 
     const monthlyData = employee.salaryHistory.filter(h => {
+      if (!h.date) return false;
       const d = new Date(h.date);
       return d.getMonth() === month && d.getFullYear() === year;
     });
