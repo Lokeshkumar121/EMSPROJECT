@@ -124,41 +124,41 @@ export const updateTaskStatus = async (req, res) => {
       return res.status(404).json({ message: "Employee not found" });
     }
 
-      if (isNewDay(employee.updatedAt)) {
-      employee.salaryStats.completedToday = 0;
-      employee.salaryStats.failedToday = 0;
-      employee.salaryStats.bonusPercent = 0;
-      employee.salaryStats.penaltyPercent = 0;
-      employee.todaySalary = employee.baseSalaryPerDay;
-       employee.salaryStats.lastResetDate = new Date();
-    }
     const task = employee.tasks[taskIndex];
     if (!task) {
       return res.status(404).json({ message: "Task not found" });
     }
 
-    // 🔥 REMOVE OLD COUNTS
-     if (task.newTask && employee.taskCounts.newTask > 0)
+    // ================= REMOVE OLD COUNTS =================
+
+    if (task.newTask && employee.taskCounts.newTask > 0)
       employee.taskCounts.newTask--;
 
     if (task.active && employee.taskCounts.active > 0)
       employee.taskCounts.active--;
 
-    if (task.complete && employee.taskCounts.complete > 0)
+    if (task.complete && employee.taskCounts.complete > 0) {
       employee.taskCounts.complete--;
+      if (employee.salaryStats.completedToday > 0)
+        employee.salaryStats.completedToday--;
+    }
 
-    if (task.failed && employee.taskCounts.failed > 0)
+    if (task.failed && employee.taskCounts.failed > 0) {
       employee.taskCounts.failed--;
+      if (employee.salaryStats.failedToday > 0)
+        employee.salaryStats.failedToday--;
+    }
 
-    // 🔥 RESET ALL FLAGS
+    // ================= RESET FLAGS =================
+
     task.newTask = false;
     task.active = false;
     task.complete = false;
     task.failed = false;
 
-    // 🔥 SET NEW STATUS
-      // 🔥 SET NEW STATUS
-     let fastCompleted = 0;
+    let fastCompleted = 0;
+
+    // ================= SET NEW STATUS =================
 
     if (status === "new") {
       task.newTask = true;
@@ -176,26 +176,24 @@ export const updateTaskStatus = async (req, res) => {
 
       employee.taskCounts.complete++;
       employee.salaryStats.completedToday++;
-      employee.salaryStats.bonusPercent += 10;
 
-      // ⏱ Fast completion bonus
+      // Fast completion bonus
       if (
         task.expectedTime &&
         (task.completedAt - task.assignedAt) / 60000 <= task.expectedTime
       ) {
         fastCompleted = 1;
-        employee.salaryStats.bonusPercent += 10;
       }
     }
 
     if (status === "failed") {
       task.failed = true;
-
       employee.taskCounts.failed++;
       employee.salaryStats.failedToday++;
-      employee.salaryStats.penaltyPercent += 7;
     }
-        // 💰 FINAL SALARY CALCULATION
+
+    // ================= SALARY CALCULATION =================
+
     employee.todaySalary = calculateSalary({
       baseSalary: employee.baseSalaryPerDay,
       completed: employee.salaryStats.completedToday,
@@ -203,43 +201,48 @@ export const updateTaskStatus = async (req, res) => {
       fastCompleted,
     });
 
-    // 🔥 ADD NEW COUNTS
-     // 🔥 ADD NEW COUNTS
-    // if (task.newTask) employee.taskCounts.newTask++;
-    // if (task.active) employee.taskCounts.active++;
-    // if (task.complete) employee.taskCounts.complete++;
-    // if (task.failed) employee.taskCounts.failed++;
-    const today = new Date().toDateString();
+    // ================= UPDATE TODAY ENTRY IN HISTORY =================
 
-const alreadySaved = employee.salaryHistory.find(
-  (s) => new Date(s.date).toDateString() === today
-);
+    const todayString = new Date().toDateString();
 
-if (!alreadySaved) {
-  employee.salaryHistory.push({
-    date: new Date(),
-    salary: employee.todaySalary
-  });
-} else {
-  alreadySaved.salary = employee.todaySalary;
-}
+    const existingEntry = employee.salaryHistory.find(
+      (s) => new Date(s.date).toDateString() === todayString
+    );
+
+    if (!existingEntry) {
+      employee.salaryHistory.push({
+        date: new Date(),
+        salary: employee.todaySalary,
+        completed: employee.salaryStats.completedToday,
+        failed: employee.salaryStats.failedToday,
+      });
+    } else {
+      existingEntry.salary = employee.todaySalary;
+      existingEntry.completed = employee.salaryStats.completedToday;
+      existingEntry.failed = employee.salaryStats.failedToday;
+    }
 
     await employee.save();
-     io.emit("taskStatusUpdate", {
+
+    // ================= SOCKET EMIT =================
+
+    io.emit("taskStatusUpdate", {
       employeeId,
       employeeName: `${employee.firstName} ${employee.lastName}`,
-      taskId: task._id || taskIndex,
       status,
       todaySalary: employee.todaySalary,
     });
+
     res.status(200).json({
       message: "Task updated & salary recalculated",
       todaySalary: employee.todaySalary,
       stats: employee.salaryStats,
     });
+
   } catch (err) {
-      console.error("UPDATE TASK ERROR:", err);
+    console.error("UPDATE TASK ERROR:", err);
     res.status(500).json({ message: err.message });
   }
 };
+
 

@@ -28,6 +28,77 @@ router.get("/:id/salary", async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+// 🔹 Monthly Summary
+router.get("/:id/monthly-summary", async (req, res) => {
+  try {
+    const employee = await Employee.findById(req.params.id);
+
+    if (!employee) {
+      return res.status(404).json({ message: "Employee not found" });
+    }
+
+    const now = new Date();
+    const month = now.getMonth();
+    const year = now.getFullYear();
+
+    const monthlyData = employee.salaryHistory.filter(h => {
+      const d = new Date(h.date);
+      return d.getMonth() === month && d.getFullYear() === year;
+    });
+
+    const totalSalary = monthlyData.reduce(
+  (acc, h) => acc + (h.salary || 0),
+  0
+);
+
+const totalCompleted = monthlyData.reduce(
+  (acc, h) => acc + (h.completed || 0),
+  0
+);
+
+const totalFailed = monthlyData.reduce(
+  (acc, h) => acc + (h.failed || 0),
+  0
+);
+
+
+    res.json({
+      totalSalary,
+      totalCompleted,
+      totalFailed,
+      monthlyData
+    });
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+// 🔹 Pay Salary
+router.post("/:id/pay-salary", async (req, res) => {
+  try {
+    const { amount } = req.body;
+
+    const employee = await Employee.findById(req.params.id);
+
+    if (!employee) {
+      return res.status(404).json({ message: "Employee not found" });
+    }
+
+    employee.salaryPaidHistory.push({
+      amount,
+      date: new Date(),
+      transactionId: "TXN" + Date.now()
+    });
+
+    await employee.save();
+
+    res.json({ message: "Salary Paid Successfully" });
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 
 // Tasks
 router.post("/tasks", addTaskToEmployee);

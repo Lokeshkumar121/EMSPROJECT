@@ -1,112 +1,116 @@
-import React, { useContext, useEffect } from 'react'
-import { Authcontext } from '../../context/AuthProvider'
+import React, { useContext, useEffect } from "react";
+import { Authcontext } from "../../context/AuthProvider";
 import { useNavigate } from "react-router-dom";
-import socket from "../../socket"
-
-// import { toast } from "react-toastify";
-// import "react-toastify/dist/ReactToastify.css";
+import socket from "../../socket";
 
 const Alltask = ({ onEmployeeDeleted }) => {
-  const { userData, deleteEmployee , fetchEmployees} = useContext(Authcontext);
+  const { userData, deleteEmployee, fetchEmployees } =
+    useContext(Authcontext);
+
   const navigate = useNavigate();
+
+  // ✅ Single clean socket listener
   useEffect(() => {
-  const handleUpdate = () => {
-    fetchEmployees();   // 🔥 real-time refresh
-  };
+    const handleUpdate = () => {
+      fetchEmployees();
+    };
 
-  socket.on("taskStatusUpdate", handleUpdate);
+    socket.on("taskStatusUpdate", handleUpdate);
 
-  return () => {
-    socket.off("taskStatusUpdate", handleUpdate);
-  };
-}, [fetchEmployees]);
+    return () => {
+      socket.off("taskStatusUpdate", handleUpdate);
+    };
+  }, [fetchEmployees]);
 
-  useEffect(() => {
-  socket.on("taskStatusUpdate", () => {
-    fetchEmployees(); // 🔥 REAL-TIME REFRESH
-  });
+  // ✅ Safe filtering
+  const employeesOnly =
+    userData?.filter((emp) => emp.role === "employee") || [];
 
-  return () => socket.off("taskStatusUpdate");
-}, []);
-
-  // 🔹 Filter only employees
-  //  const employeesOnly = userData.filter(emp => emp.role === "employee");
-  const employeesOnly = userData.filter(emp => emp.email !== "admin@gmail.com");
-
-  console.log("All users:", userData);
-
-  if (!employeesOnly || employeesOnly.length === 0) {
-    return <div className="text-gray-400 text-center mt-6">No employees found</div>;
+  if (employeesOnly.length === 0) {
+    return (
+      <div className="text-gray-400 text-center mt-6">
+        No employees found
+      </div>
+    );
   }
 
   return (
     <div className="mt-6 bg-[#111] border border-gray-800 rounded-2xl overflow-x-auto">
 
-      {/* 🔹 Sticky Header */}
-      <div className="min-w-[600px] sticky top-0 z-50 flex items-center justify-between px-4 py-3 bg-[#111] border-b border-gray-800 text-sm font-semibold text-left">
-        <span className="w-1/5 text-gray-300">Employee</span>
-        <span className="w-1/5 text-blue-400 text-center">New</span>
-        <span className="w-1/5 text-yellow-400 text-center">Active</span>
-        <span className="w-1/5 text-emerald-400 text-center">Completed</span>
-        <span className="w-1/5 text-red-400 text-center">Failed</span>
-        <span className="w-1/5 text-red-600 text-center">Deleted</span>
+      {/* ===== Header ===== */}
+      <div className="min-w-[700px] sticky top-0 z-50 flex items-center justify-between px-4 py-3 bg-[#111] border-b border-gray-800 text-sm font-semibold">
+        <span className="w-1/6 text-gray-300">Employee</span>
+        <span className="w-1/6 text-blue-400 text-center">New</span>
+        <span className="w-1/6 text-yellow-400 text-center">Active</span>
+        <span className="w-1/6 text-emerald-400 text-center">Completed</span>
+        <span className="w-1/6 text-red-400 text-center">Failed</span>
+        <span className="w-1/6 text-center">Actions</span>
       </div>
 
-
-      {/* 🔹 Scrollable Content */}
-      <div className="overflow-y-auto h-56 min-w-[600px] p-2">
-        {employeesOnly.map((elem, index) => (
+      {/* ===== Employee List ===== */}
+      <div className="overflow-y-auto h-[60vh] min-w-[700px] p-2">
+        {employeesOnly.map((elem) => (
           <div
             key={elem._id}
             className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-4 py-2 rounded-lg mb-2 bg-[#181818] border border-gray-800 hover:bg-[#1f1f1f] transition"
           >
+            {/* Employee Name */}
             <button
-  type="button"
-  onClick={() => { console.log("ID:", elem._id); navigate(`/employee/${elem._id}`)}}
-  className="w-full sm:w-1/5 text-left text-white hover:text-emerald-400 font-medium cursor-pointer"
->
-  {elem.firstName} {elem.lastName}
-</button>
+              onClick={() => navigate(`/employee/${elem._id}`)}
+              className="w-full sm:w-1/6 text-left text-white hover:text-emerald-400 font-medium"
+            >
+              {elem.firstName} {elem.lastName}
+            </button>
 
-            <span className="w-full sm:w-1/5 text-blue-400 font-semibold text-center mb-1 sm:mb-0">
-              {elem.taskCounts.newTask}
+            {/* Task Counts */}
+            <span className="w-full sm:w-1/6 text-blue-400 text-center font-semibold">
+              {elem.taskCounts?.newTask || 0}
             </span>
 
-            <span className="w-full sm:w-1/5 text-yellow-400 font-semibold text-center mb-1 sm:mb-0">
-              {elem.taskCounts.active}
+            <span className="w-full sm:w-1/6 text-yellow-400 text-center font-semibold">
+              {elem.taskCounts?.active || 0}
             </span>
 
-            <span className="w-full sm:w-1/5 text-emerald-400 font-semibold text-center mb-1 sm:mb-0">
-              {elem.taskCounts.complete}
+            <span className="w-full sm:w-1/6 text-emerald-400 text-center font-semibold">
+              {elem.taskCounts?.complete || 0}
             </span>
 
-            <span className="w-full sm:w-1/5 text-red-400 font-semibold text-center mb-1 sm:mb-0">
-              {elem.taskCounts.failed}
+            <span className="w-full sm:w-1/6 text-red-400 text-center font-semibold">
+              {elem.taskCounts?.failed || 0}
             </span>
-            <span className="w-full sm:w-1/5 flex justify-center">
+
+            {/* Action Buttons */}
+            <div className="w-full sm:w-1/6 flex justify-center gap-2 mt-2 sm:mt-0">
+
+              {/* Monthly Salary Button */}
+              <button
+                onClick={() =>
+                  navigate(`/employee/${elem._id}/monthly`)
+                }
+                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg text-sm"
+              >
+                💰 Salary
+              </button>
+
+              {/* Delete Button */}
               <button
                 onClick={async () => {
-  await deleteEmployee(elem._id);
-  if (onEmployeeDeleted) {
-    onEmployeeDeleted(); // 🔥 refresh analytics
-  }
-}}
-                className="bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-semibold px-3 sm:px-4 py-2 rounded-lg shadow-lg transition-all duration-200 ease-in-out flex items-center justify-center gap-1 w-full sm:w-auto"
-                title="Delete"
+                  await deleteEmployee(elem._id);
+                  fetchEmployees();
+                  if (onEmployeeDeleted) {
+                    onEmployeeDeleted();
+                  }
+                }}
+                className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-lg text-sm"
               >
                 ❌
               </button>
-            </span>
-
-
+            </div>
           </div>
         ))}
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default Alltask;
-
-
-

@@ -3,8 +3,10 @@ import dotenv from "dotenv";
 import authRoutes from "./routes/authRoutes.js"
 import connectDB from "./config/db.js";
 import employeeRoutes from "./routes/employeeRoutes.js";
-
 import analyticsRoutes from "./routes/analyticsRoutes.js"
+import Employee from "./models/Employee.js";
+import corn from "node-cron"
+
 
 
 
@@ -93,6 +95,42 @@ io.on("connection", (socket) => {
   });
 });
 
+
+//  DAILY MIDNIGHT SALARY RESET SYSTEM
+
+
+cron.schedule("0 0 * * *", async () => {
+  console.log("🕛 Running Midnight Salary Reset...");
+
+  try {
+    const employees = await Employee.find();
+
+    for (let emp of employees) {
+
+      // Save today's salary data into history
+      emp.salaryHistory.push({
+        date: new Date(),
+        salary: emp.todaySalary,
+        completed: emp.salaryStats.completedToday,
+        failed: emp.salaryStats.failedToday
+      });
+
+      // Reset daily values
+      emp.todaySalary = 0;
+      emp.salaryStats.completedToday = 0;
+      emp.salaryStats.failedToday = 0;
+      emp.salaryStats.bonusPercent = 0;
+      emp.salaryStats.penaltyPercent = 0;
+
+      await emp.save();
+    }
+
+    console.log("✅ Daily Reset Completed");
+
+  } catch (error) {
+    console.error("❌ Cron Reset Error:", error);
+  }
+});
 
 
 // ✅ START SERVER

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { type } from "node:os";
+
 
 const employeeSchema = new mongoose.Schema({
   firstName: { type: String, required: true },
@@ -11,6 +11,7 @@ const employeeSchema = new mongoose.Schema({
     enum: ["admin", "employee"],
     default: "employee"
   },
+
   tasks: [
     {
       title: String,
@@ -33,14 +34,15 @@ const employeeSchema = new mongoose.Schema({
     failed: { type: Number, default: 0 },
   },
   // salary system 
-    baseSalaryPerDay: {
+  baseSalaryPerDay: {
     type: Number,
     default: 1000, // ₹1000 per day (change later)
   },
 
+
   todaySalary: {
     type: Number,
-    default: 1000,
+    default: 0,
   },
 
   salaryStats: {
@@ -50,12 +52,26 @@ const employeeSchema = new mongoose.Schema({
     penaltyPercent: { type: Number, default: 0 },
   },
   salaryHistory: [
-  {
-    date: { type: Date, required: true },
-    salary: { type: Number, required: true }
-  }
-],
-} , { timestamps: true });
+    {
+      date: { type: Date, required: true },
+      salary: { type: Number, required: true },
+      completed: { type: Number, default: 0 },
+      failed: { type: Number, default: 0 }
+    }
+  ],
+  // UPI ID
+  upiId: {
+    type: String
+  },
+  // Salary payment tracking
+  salaryPaidHistory: [
+    {
+      amount: Number,
+      date: Date,
+      transactionId: String
+    }
+  ],
+}, { timestamps: true });
 
 const Employee = mongoose.model("Employee", employeeSchema);
 export default Employee;

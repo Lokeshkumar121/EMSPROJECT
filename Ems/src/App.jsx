@@ -9,6 +9,7 @@ import EmployeeSalary from "./pages/EmployeeSalary";
 import { Authcontext } from "./context/AuthProvider";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import MonthlySalary from "./components/MonthlyGraph";
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -74,6 +75,10 @@ const App = () => {
         />
 
         <Route path="/employee/:id" element={<EmployeeSalary />} />
+        <Route
+          path="/employee/:id/monthly"
+          element={<MonthlySalary />}
+        />
       </Routes>
     </>
   );
