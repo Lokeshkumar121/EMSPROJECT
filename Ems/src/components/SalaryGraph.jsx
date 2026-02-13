@@ -1,46 +1,50 @@
-import { useEffect, useState } from "react";
-import { Bar } from "react-chartjs-2";
+import { useEffect, useRef } from "react";
+import { createChart } from "lightweight-charts";
 import axios from "axios";
-import "../utils/chartSetup";
 import { API_BASE } from "../config/api";
 
 export default function SalaryGraph({ employeeId }) {
-  const [data, setData] = useState(null);
+  const chartContainerRef = useRef();
 
   useEffect(() => {
     if (!employeeId) return;
 
+    const chart = createChart(chartContainerRef.current, {
+      width: chartContainerRef.current.clientWidth,
+      height: 400,
+      layout: {
+        background: { color: "#0f0f0f" },
+        textColor: "#DDD",
+      },
+      grid: {
+        vertLines: { color: "#1f1f1f" },
+        horzLines: { color: "#1f1f1f" },
+      },
+      timeScale: {
+        timeVisible: true,
+        secondsVisible: false,
+      },
+    });
+
+    const lineSeries = chart.addLineSeries({
+      color: "#00ff88",
+      lineWidth: 2,
+    });
+
     axios.get(`${API_BASE}/employees/${employeeId}/salary`)
       .then(res => {
-        console.log("API Response:", res.data);
-
         const history = res.data.salaryHistory || [];
 
-        const labels = history.map(h =>
-          new Date(h.date).toLocaleDateString()
-        );
+        const formattedData = history.map(h => ({
+          time: h.date.split("T")[0],
+          value: h.salary,
+        }));
 
-        const salaries = history.map(h => h.salary);
-
-        setData({
-          labels,
-          datasets: [{
-            label: "Daily Salary",
-            data: salaries,
-            borderColor: "rgb(75,192,192)",
-            backgroundColor: "rgba(75,192,192,0.2)",
-            tension: 0.3,
-            borderWidth: 2
-          }]
-        });
-      })
-      .catch(err => {
-        console.error("Salary fetch error:", err);
+        lineSeries.setData(formattedData);
       });
 
+    return () => chart.remove();
   }, [employeeId]);
 
-  if (!data) return <p>Loading graph...</p>;
-
-  return <Bar data={data} />;
+  return <div ref={chartContainerRef} />;
 }
