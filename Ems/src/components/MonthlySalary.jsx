@@ -3,6 +3,24 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import { Line } from "react-chartjs-2";
 import { API_BASE } from "../config/api";
+import {
+  Chart as ChartJS,
+  LineElement,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  Tooltip,
+  Legend
+} from "chart.js";
+
+ChartJS.register(
+  LineElement,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  Tooltip,
+  Legend
+);
 
 export default function MonthlySalary() {
 
