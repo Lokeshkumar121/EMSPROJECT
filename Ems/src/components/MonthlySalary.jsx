@@ -1,22 +1,26 @@
 import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import axios from "axios";
 import { Line } from "react-chartjs-2";
 import { API_BASE } from "../config/api";
 
-export default function MonthlySalary({ employeeId }) {
+export default function MonthlySalary() {
 
+  const { id } = useParams();   // ✅ GET ID FROM URL
   const [summary, setSummary] = useState(null);
   const [graphData, setGraphData] = useState(null);
   const [amount, setAmount] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!id) return;
     fetchMonthlyData();
-  }, [employeeId]);
+  }, [id]);
 
   const fetchMonthlyData = async () => {
     try {
       const res = await axios.get(
-        `${API_BASE}/employees/${employeeId}/monthly-summary`
+        `${API_BASE}/employees/${id}/monthly-summary`
       );
 
       setSummary(res.data);
@@ -40,14 +44,18 @@ export default function MonthlySalary({ employeeId }) {
       });
 
     } catch (err) {
-      console.error(err);
+      console.error("Fetch Error:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handlePaySalary = async () => {
+    if (!amount) return alert("Enter amount");
+
     try {
       await axios.post(
-        `${API_BASE}/employees/${employeeId}/pay-salary`,
+        `${API_BASE}/employees/${id}/pay-salary`,
         { amount }
       );
 
@@ -56,21 +64,19 @@ export default function MonthlySalary({ employeeId }) {
       fetchMonthlyData();
 
     } catch (err) {
-      console.error(err);
+      console.error("Payment Error:", err);
     }
   };
 
-  if (!summary) return <p>Loading...</p>;
+  if (loading) return <p>Loading...</p>;
+  if (!summary) return <p>No data found</p>;
 
   return (
     <div style={{ padding: "20px" }}>
-
       <h2>Monthly Salary Dashboard</h2>
 
-      {/* ================= SUMMARY CARDS ================= */}
-
+      {/* ===== SUMMARY ===== */}
       <div style={{ display: "flex", gap: "20px", marginBottom: "20px" }}>
-
         <div>
           <h4>Total Salary</h4>
           <p>₹ {summary.totalSalary}</p>
@@ -85,19 +91,16 @@ export default function MonthlySalary({ employeeId }) {
           <h4>Failed Tasks</h4>
           <p>{summary.totalFailed}</p>
         </div>
-
       </div>
 
-      {/* ================= GRAPH ================= */}
-
+      {/* ===== GRAPH ===== */}
       {graphData && (
         <div style={{ width: "600px" }}>
           <Line data={graphData} />
         </div>
       )}
 
-      {/* ================= PAY SALARY ================= */}
-
+      {/* ===== PAY SALARY ===== */}
       <div style={{ marginTop: "30px" }}>
         <h3>Pay Salary</h3>
 
@@ -112,7 +115,6 @@ export default function MonthlySalary({ employeeId }) {
           Pay Salary
         </button>
       </div>
-
     </div>
   );
 }

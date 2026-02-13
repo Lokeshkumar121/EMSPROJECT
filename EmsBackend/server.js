@@ -5,7 +5,9 @@ import connectDB from "./config/db.js";
 import employeeRoutes from "./routes/employeeRoutes.js";
 import analyticsRoutes from "./routes/analyticsRoutes.js"
 import Employee from "./models/Employee.js";
-import corn from "node-cron"
+import cron from "node-cron";
+
+
 
 
 
