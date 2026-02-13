@@ -56,8 +56,8 @@ const Alltask = ({ onEmployeeDeleted }) => {
           >
             {/* Employee Name */}
             <button
-              onClick={() => navigate(`/employee/${elem._id}`)}
-              className="w-full sm:w-1/6 text-left text-white hover:text-emerald-400 font-medium"
+              
+              className="w-full sm:w-1/6 text-left text-white  font-medium"
             >
               {elem.firstName} {elem.lastName}
             </button>
