@@ -91,51 +91,134 @@ export default function MonthlySalary() {
 
   if (loading) return <p>Loading...</p>;
   if (!summary) return <p>No data found</p>;
+  const styles = {
+  container: {
+    padding: "40px",
+    fontFamily: "Arial, sans-serif",
+    background: "#f4f6f9",
+    minHeight: "100vh"
+  },
+  title: {
+    marginBottom: "30px",
+    fontSize: "28px",
+    fontWeight: "bold"
+  },
+  cardContainer: {
+    display: "flex",
+    gap: "20px",
+    marginBottom: "30px",
+    flexWrap: "wrap"
+  },
+  card: {
+    flex: "1",
+    minWidth: "200px",
+    background: "#ffffff",
+    padding: "20px",
+    borderRadius: "12px",
+    boxShadow: "0 4px 10px rgba(0,0,0,0.08)"
+  },
+  amount: {
+    fontSize: "22px",
+    fontWeight: "bold",
+    color: "#2c3e50"
+  },
+  success: {
+    fontSize: "22px",
+    fontWeight: "bold",
+    color: "#27ae60"
+  },
+  danger: {
+    fontSize: "22px",
+    fontWeight: "bold",
+    color: "#e74c3c"
+  },
+  chartCard: {
+    background: "#ffffff",
+    padding: "20px",
+    borderRadius: "12px",
+    boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
+    marginBottom: "30px"
+  },
+  paySection: {
+    background: "#ffffff",
+    padding: "20px",
+    borderRadius: "12px",
+    boxShadow: "0 4px 10px rgba(0,0,0,0.08)"
+  },
+  payBox: {
+    display: "flex",
+    gap: "15px",
+    marginTop: "15px",
+    flexWrap: "wrap"
+  },
+  input: {
+    padding: "10px",
+    fontSize: "16px",
+    borderRadius: "8px",
+    border: "1px solid #ccc",
+    flex: "1",
+    minWidth: "150px"
+  },
+  button: {
+    padding: "10px 20px",
+    fontSize: "16px",
+    borderRadius: "8px",
+    border: "none",
+    backgroundColor: "#3498db",
+    color: "#fff",
+    cursor: "pointer"
+  }
+};
 
-  return (
-    <div style={{ padding: "20px" }}>
-      <h2>Monthly Salary Dashboard</h2>
 
-      {/* ===== SUMMARY ===== */}
-      <div style={{ display: "flex", gap: "20px", marginBottom: "20px" }}>
-        <div>
-          <h4>Total Salary</h4>
-          <p>₹ {summary.totalSalary}</p>
-        </div>
+ return (
+  <div style={styles.container}>
+    <h2 style={styles.title}>Monthly Salary Dashboard</h2>
 
-        <div>
-          <h4>Completed Tasks</h4>
-          <p>{summary.totalCompleted}</p>
-        </div>
-
-        <div>
-          <h4>Failed Tasks</h4>
-          <p>{summary.totalFailed}</p>
-        </div>
+    {/* ===== SUMMARY CARDS ===== */}
+    <div style={styles.cardContainer}>
+      <div style={styles.card}>
+        <h4>Total Salary</h4>
+        <p style={styles.amount}>₹ {summary.totalSalary}</p>
       </div>
 
-      {/* ===== GRAPH ===== */}
-      {graphData && (
-        <div style={{ width: "600px" }}>
-          <Line data={graphData} />
-        </div>
-      )}
+      <div style={styles.card}>
+        <h4>Completed Tasks</h4>
+        <p style={styles.success}>{summary.totalCompleted}</p>
+      </div>
 
-      {/* ===== PAY SALARY ===== */}
-      <div style={{ marginTop: "30px" }}>
-        <h3>Pay Salary</h3>
+      <div style={styles.card}>
+        <h4>Failed Tasks</h4>
+        <p style={styles.danger}>{summary.totalFailed}</p>
+      </div>
+    </div>
 
+    {/* ===== GRAPH SECTION ===== */}
+    {graphData && (
+      <div style={styles.chartCard}>
+        <Line data={graphData} />
+      </div>
+    )}
+
+    {/* ===== PAY SALARY SECTION ===== */}
+    <div style={styles.paySection}>
+      <h3>Pay Salary</h3>
+
+      <div style={styles.payBox}>
         <input
           type="number"
           placeholder="Enter amount"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
+          style={styles.input}
         />
 
-        <button onClick={handlePaySalary}>
+        <button onClick={handlePaySalary} style={styles.button}>
           Pay Salary
         </button>
       </div>
     </div>
-  );
+  </div>
+);
+
 }
