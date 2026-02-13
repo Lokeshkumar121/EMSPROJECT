@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { createChart } from "lightweight-charts";
+import { createChart, LineSeries } from "lightweight-charts";
 import axios from "axios";
 import { API_BASE } from "../config/api";
 
@@ -20,13 +20,10 @@ export default function SalaryGraph({ employeeId }) {
         vertLines: { color: "#1f1f1f" },
         horzLines: { color: "#1f1f1f" },
       },
-      timeScale: {
-        timeVisible: true,
-        secondsVisible: false,
-      },
     });
 
-    const lineSeries = chart.addLineSeries({
+    // ✅ NEW WAY (v5+)
+    const lineSeries = chart.addSeries(LineSeries, {
       color: "#00ff88",
       lineWidth: 2,
     });
@@ -44,6 +41,7 @@ export default function SalaryGraph({ employeeId }) {
       });
 
     return () => chart.remove();
+
   }, [employeeId]);
 
   return <div ref={chartContainerRef} />;
