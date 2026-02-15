@@ -109,20 +109,23 @@ cron.schedule("0 0 * * *", async () => {
 
     for (let emp of employees) {
 
-      // Save today's salary data into history
-      emp.salaryHistory.push({
-        date: new Date(),
-        salary: emp.todaySalary,
-        completed: emp.salaryStats.completedToday,
-        failed: emp.salaryStats.failedToday
-      });
+      if (emp.todaySalary > 0) {
+        emp.salaryHistory.push({
+          date: new Date(),
+          salary: emp.todaySalary,
+          completed: emp.salaryStats.completedToday,
+          failed: emp.salaryStats.failedToday
+        });
+      }
 
-      // Reset daily values
       emp.todaySalary = 0;
       emp.salaryStats.completedToday = 0;
       emp.salaryStats.failedToday = 0;
       emp.salaryStats.bonusPercent = 0;
       emp.salaryStats.penaltyPercent = 0;
+
+      // 🔥 IMPORTANT
+      emp.lastSalaryResetDate = new Date();
 
       await emp.save();
     }
@@ -132,7 +135,14 @@ cron.schedule("0 0 * * *", async () => {
   } catch (error) {
     console.error("❌ Cron Reset Error:", error);
   }
-});
+
+}
+,{
+   timezone: "Asia/Kolkata",
+}
+
+);
+
 
 
 // ✅ START SERVER

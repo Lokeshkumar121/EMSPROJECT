@@ -23,36 +23,7 @@ export const getEmployees = async (req, res) => {
 
      const today = new Date();
 
-    for (let employee of employees) {
-
-      const last = new Date(employee.lastSalaryResetDate);
-
-      const isNewDay =
-        today.getFullYear() !== last.getFullYear() ||
-        today.getMonth() !== last.getMonth() ||
-        today.getDate() !== last.getDate();
-
-      if (isNewDay) {
-
-        // Save yesterday salary
-        if (employee.todaySalary > 0) {
-          employee.salaryHistory.push({
-            date: employee.lastSalaryResetDate,
-            salary: employee.todaySalary,
-            completed: employee.salaryStats.completedToday,
-            failed: employee.salaryStats.failedToday,
-          });
-        }
-
-        // Reset
-        employee.todaySalary = 0;
-        employee.salaryStats.completedToday = 0;
-        employee.salaryStats.failedToday = 0;
-        employee.lastSalaryResetDate = new Date();
-
-        await employee.save();
-      }
-    }
+   
 
     res.status(200).json(employees);
 
@@ -174,25 +145,7 @@ export const updateTaskStatus = async (req, res) => {
 
     const todayString = new Date().toDateString();
 
-    // ================= DAILY RESET CHECK =================
-    if (isNewDay(employee.lastSalaryResetDate)) {
-
-      if (employee.todaySalary > 0) {
-        employee.salaryHistory.push({
-          date: employee.lastSalaryResetDate,
-          salary: employee.todaySalary,
-          completed: employee.salaryStats.completedToday,
-          failed: employee.salaryStats.failedToday,
-        });
-      }
-
-      employee.todaySalary = 0;
-      employee.salaryStats.completedToday = 0;
-      employee.salaryStats.failedToday = 0;
-
-      employee.lastSalaryResetDate = new Date();
-      await employee.save();
-    }
+   
 
     // ================= REMOVE OLD COUNTS SAFELY =================
 
@@ -269,27 +222,28 @@ export const updateTaskStatus = async (req, res) => {
         fastCompleted,
       });
     }
+    await employee.save();
 
     // ================= UPDATE TODAY ENTRY IN HISTORY =================
 
-    let existingEntry = employee.salaryHistory.find(
-      (s) => new Date(s.date).toDateString() === todayString
-    );
+    // let existingEntry = employee.salaryHistory.find(
+    //   (s) => new Date(s.date).toDateString() === todayString
+    // );
 
-    if (!existingEntry) {
-      employee.salaryHistory.push({
-        date: new Date(),
-        salary: employee.todaySalary,
-        completed: employee.salaryStats.completedToday,
-        failed: employee.salaryStats.failedToday,
-      });
-    } else {
-      existingEntry.salary = employee.todaySalary;
-      existingEntry.completed = employee.salaryStats.completedToday;
-      existingEntry.failed = employee.salaryStats.failedToday;
-    }
+    // if (!existingEntry) {
+    //   employee.salaryHistory.push({
+    //     date: new Date(),
+    //     salary: employee.todaySalary,
+    //     completed: employee.salaryStats.completedToday,
+    //     failed: employee.salaryStats.failedToday,
+    //   });
+    // } else {
+    //   existingEntry.salary = employee.todaySalary;
+    //   existingEntry.completed = employee.salaryStats.completedToday;
+    //   existingEntry.failed = employee.salaryStats.failedToday;
+    // }
 
-    await employee.save();
+    // await employee.save();
 
     // ================= SOCKET EMIT =================
 
