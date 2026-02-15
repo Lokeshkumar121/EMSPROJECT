@@ -1,16 +1,61 @@
 import Employee from "../models/Employee.js";
 import { io } from "../server.js"; // ✅ Import Socket.io instance
 import { calculateSalary } from "../utils/calculateSalary.js";
-const isNewDay = (date) => {
-  if (!date) return true;
-  const today = new Date().toDateString();
-  return new Date(date).toDateString() !== today;
+
+const isNewDay = (lastDate) => {
+  if (!lastDate) return true;
+
+  const today = new Date();
+  const last = new Date(lastDate);
+
+  return (
+    today.getFullYear() !== last.getFullYear() ||
+    today.getMonth() !== last.getMonth() ||
+    today.getDate() !== last.getDate()
+  );
 };
+
+
 // 🔹 Get all employees
 export const getEmployees = async (req, res) => {
   try {
     const employees = await Employee.find(); // get all employees
+
+     const today = new Date();
+
+    for (let employee of employees) {
+
+      const last = new Date(employee.lastSalaryResetDate);
+
+      const isNewDay =
+        today.getFullYear() !== last.getFullYear() ||
+        today.getMonth() !== last.getMonth() ||
+        today.getDate() !== last.getDate();
+
+      if (isNewDay) {
+
+        // Save yesterday salary
+        if (employee.todaySalary > 0) {
+          employee.salaryHistory.push({
+            date: employee.lastSalaryResetDate,
+            salary: employee.todaySalary,
+            completed: employee.salaryStats.completedToday,
+            failed: employee.salaryStats.failedToday,
+          });
+        }
+
+        // Reset
+        employee.todaySalary = 0;
+        employee.salaryStats.completedToday = 0;
+        employee.salaryStats.failedToday = 0;
+        employee.lastSalaryResetDate = new Date();
+
+        await employee.save();
+      }
+    }
+
     res.status(200).json(employees);
+
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -82,17 +127,17 @@ export const addTaskToEmployee = async (req, res) => {
 
     // Add task
     employee.tasks.push({
-   title: task.title,
+      title: task.title,
       description: task.description,
       category: task.category,
       expectedTime: task.expectedTime,
-  newTask: true,
-  active: false,
-  complete: false,
-  failed: false,
-  assignedAt: new Date()
-});
-employee.taskCounts.newTask++;
+      newTask: true,
+      active: false,
+      complete: false,
+      failed: false,
+      assignedAt: new Date()
+    });
+    employee.taskCounts.newTask++;
 
     // Update taskCounts automatically
     // if (task.newTask) employee.taskCounts.newTask += 1;
@@ -101,7 +146,7 @@ employee.taskCounts.newTask++;
     // if (task.failed) employee.taskCounts.failed += 1;
 
     await employee.save();
-      // 🔔 Emit notification to employee in real-time
+    // 🔔 Emit notification to employee in real-time
     io.to(employeeId).emit("newTask", {
       // taskId: task._id || employee.tasks.length - 1,
       title: task.title,
@@ -120,31 +165,53 @@ export const updateTaskStatus = async (req, res) => {
     const { employeeId, taskIndex, status } = req.body;
 
     const employee = await Employee.findById(employeeId);
-    if (!employee) {
+    if (!employee)
       return res.status(404).json({ message: "Employee not found" });
-    }
 
     const task = employee.tasks[taskIndex];
-    if (!task) {
+    if (!task)
       return res.status(404).json({ message: "Task not found" });
+
+    const todayString = new Date().toDateString();
+
+    // ================= DAILY RESET CHECK =================
+    if (isNewDay(employee.lastSalaryResetDate)) {
+
+      if (employee.todaySalary > 0) {
+        employee.salaryHistory.push({
+          date: employee.lastSalaryResetDate,
+          salary: employee.todaySalary,
+          completed: employee.salaryStats.completedToday,
+          failed: employee.salaryStats.failedToday,
+        });
+      }
+
+      employee.todaySalary = 0;
+      employee.salaryStats.completedToday = 0;
+      employee.salaryStats.failedToday = 0;
+
+      employee.lastSalaryResetDate = new Date();
+      await employee.save();
     }
 
-    // ================= REMOVE OLD COUNTS =================
+    // ================= REMOVE OLD COUNTS SAFELY =================
 
-    if (task.newTask && employee.taskCounts.newTask > 0)
-      employee.taskCounts.newTask--;
+    const decrement = (field) => {
+      if (employee.taskCounts[field] > 0)
+        employee.taskCounts[field]--;
+    };
 
-    if (task.active && employee.taskCounts.active > 0)
-      employee.taskCounts.active--;
+    if (task.newTask) decrement("newTask");
+    if (task.active) decrement("active");
 
-    if (task.complete && employee.taskCounts.complete > 0) {
-      employee.taskCounts.complete--;
+    if (task.complete) {
+      decrement("complete");
       if (employee.salaryStats.completedToday > 0)
         employee.salaryStats.completedToday--;
     }
 
-    if (task.failed && employee.taskCounts.failed > 0) {
-      employee.taskCounts.failed--;
+    if (task.failed) {
+      decrement("failed");
       if (employee.salaryStats.failedToday > 0)
         employee.salaryStats.failedToday--;
     }
@@ -177,9 +244,9 @@ export const updateTaskStatus = async (req, res) => {
       employee.taskCounts.complete++;
       employee.salaryStats.completedToday++;
 
-      // Fast completion bonus
       if (
         task.expectedTime &&
+        task.assignedAt &&
         (task.completedAt - task.assignedAt) / 60000 <= task.expectedTime
       ) {
         fastCompleted = 1;
@@ -194,18 +261,18 @@ export const updateTaskStatus = async (req, res) => {
 
     // ================= SALARY CALCULATION =================
 
-    employee.todaySalary = calculateSalary({
-      baseSalary: employee.baseSalaryPerDay,
-      completed: employee.salaryStats.completedToday,
-      failed: employee.salaryStats.failedToday,
-      fastCompleted,
-    });
+    if (status === "complete" || status === "failed") {
+      employee.todaySalary = calculateSalary({
+        baseSalary: employee.baseSalaryPerDay,
+        completed: employee.salaryStats.completedToday,
+        failed: employee.salaryStats.failedToday,
+        fastCompleted,
+      });
+    }
 
     // ================= UPDATE TODAY ENTRY IN HISTORY =================
 
-    const todayString = new Date().toDateString();
-
-    const existingEntry = employee.salaryHistory.find(
+    let existingEntry = employee.salaryHistory.find(
       (s) => new Date(s.date).toDateString() === todayString
     );
 
@@ -244,5 +311,6 @@ export const updateTaskStatus = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 

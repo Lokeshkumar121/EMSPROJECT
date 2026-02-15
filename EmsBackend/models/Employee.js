@@ -51,6 +51,10 @@ const employeeSchema = new mongoose.Schema({
     bonusPercent: { type: Number, default: 0 },
     penaltyPercent: { type: Number, default: 0 },
   },
+   lastSalaryResetDate: {
+    type: Date,
+    default: Date.now
+  },
   salaryHistory: [
     {
       date: { type: Date, required: true },
