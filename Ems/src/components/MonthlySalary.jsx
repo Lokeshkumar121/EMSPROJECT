@@ -75,15 +75,46 @@ export default function MonthlySalary() {
     }
   };
 
+   // 🔹 Razorpay payment flow
   const handlePaySalary = async () => {
     if (!amount) return alert("Enter amount");
+
     try {
-      await axios.post(`${API_BASE}/employees/${id}/pay-salary`, { amount });
-      alert("Salary Paid Successfully");
-      setAmount("");
-      fetchMonthlyData();
+      // 1️⃣ Create order from backend
+      const orderRes = await axios.post(`${API_BASE}/employees/${id}/create-order`, { amount });
+      const { id: order_id, amount: order_amount, currency } = orderRes.data;
+
+      // 2️⃣ Razorpay options
+      const options = {
+        key: process.env.REACT_APP_RAZORPAY_KEY_ID,
+        amount: order_amount,
+        currency,
+        name: "EMS - Employee Management",
+        description: "Salary Payment",
+        order_id,
+        handler: async function (response) {
+          try {
+            // 3️⃣ Save payment to backend
+            await axios.post(`${API_BASE}/employees/${id}/pay-salary`, {
+              amount,
+              transactionId: response.razorpay_payment_id,
+            });
+            alert("Salary Paid Successfully");
+            setAmount("");
+            fetchMonthlyData();
+          } catch (err) {
+            console.error("Saving Payment Error:", err);
+          }
+        },
+        theme: { color: "#10b981" },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+
     } catch (err) {
-      console.error("Payment Error:", err);
+      console.error("Payment Gateway Error:", err);
+      alert("Payment Failed, try again!");
     }
   };
 

@@ -109,6 +109,6 @@ const handleEmployeeDeleted = async () => {
         
     </div>
   )
-}
+} 
 
 export default Admindashboard;

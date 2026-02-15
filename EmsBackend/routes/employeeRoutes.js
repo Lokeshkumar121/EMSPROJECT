@@ -2,8 +2,7 @@ import express from "express";
 import mongoose from "mongoose";
 import { getEmployees, addEmployee, updateEmployee, deleteEmployee , addTaskToEmployee, updateTaskStatus } from "../controllers/employeeController.js";
 import Employee from "../models/Employee.js";
-
-
+import Razorpay from "razorpay";
 
 
 const router = express.Router();
@@ -91,6 +90,51 @@ const totalFailed = monthlyData.reduce(
   }
 });
 
+
+// 🔹 Razorpay instance
+
+console.log("KEY ID:", process.env.RAZORPAY_KEY_ID);
+console.log("KEY SECRET:", process.env.RAZORPAY_KEY_SECRET);
+
+
+// 🔹 Create Razorpay Order
+router.post("/:id/create-order", async (req, res) => {
+  try {
+
+
+    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+      return res.status(500).json({ message: "Razorpay keys missing in .env" });
+    }
+
+    const razorpay = new Razorpay({
+      key_id: process.env.RAZORPAY_KEY_ID,
+      key_secret: process.env.RAZORPAY_KEY_SECRET,
+    });
+    const { id } = req.params;
+    const { amount } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid Employee ID" });
+    }
+
+    // Employee exist check
+    const employee = await Employee.findById(id);
+    if (!employee) return res.status(404).json({ message: "Employee not found" });
+
+    // Create Razorpay order
+    const options = {
+      amount: amount * 100, // paise
+      currency: "INR",
+      receipt: `txn_${Date.now()}`,
+    };
+
+    const order = await razorpay.orders.create(options);
+    res.json(order);
+  } catch (err) {
+    console.error("CREATE ORDER ERROR:", err);
+    res.status(500).json({ message: "Order creation failed" });
+  }
+});
 
 // 🔹 Pay Salary
 router.post("/:id/pay-salary", async (req, res) => {
