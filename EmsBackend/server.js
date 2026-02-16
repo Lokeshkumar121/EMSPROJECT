@@ -109,14 +109,7 @@ cron.schedule("0 0 * * *", async () => {
 
     for (let emp of employees) {
 
-      if (emp.todaySalary > 0) {
-        emp.salaryHistory.push({
-          date: new Date(),
-          salary: emp.todaySalary,
-          completed: emp.salaryStats.completedToday,
-          failed: emp.salaryStats.failedToday
-        });
-      }
+     
 
       emp.todaySalary = 0;
       emp.salaryStats.completedToday = 0;

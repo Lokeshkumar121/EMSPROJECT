@@ -143,7 +143,7 @@ export const updateTaskStatus = async (req, res) => {
     if (!task)
       return res.status(404).json({ message: "Task not found" });
 
-    const todayString = new Date().toDateString();
+    
 
    
 
@@ -222,28 +222,29 @@ export const updateTaskStatus = async (req, res) => {
         fastCompleted,
       });
     }
-    await employee.save();
+    
 
     // ================= UPDATE TODAY ENTRY IN HISTORY =================
+    const todayString = new Date().toDateString();
+    
+    let existingEntry = employee.salaryHistory.find(
+      (s) => new Date(s.date).toDateString() === todayString
+    );
 
-    // let existingEntry = employee.salaryHistory.find(
-    //   (s) => new Date(s.date).toDateString() === todayString
-    // );
+    if (!existingEntry) {
+      employee.salaryHistory.push({
+        date: new Date(),
+        salary: employee.todaySalary,
+        completed: employee.salaryStats.completedToday,
+        failed: employee.salaryStats.failedToday,
+      });
+    } else {
+      existingEntry.salary = employee.todaySalary;
+      existingEntry.completed = employee.salaryStats.completedToday;
+      existingEntry.failed = employee.salaryStats.failedToday;
+    }
 
-    // if (!existingEntry) {
-    //   employee.salaryHistory.push({
-    //     date: new Date(),
-    //     salary: employee.todaySalary,
-    //     completed: employee.salaryStats.completedToday,
-    //     failed: employee.salaryStats.failedToday,
-    //   });
-    // } else {
-    //   existingEntry.salary = employee.todaySalary;
-    //   existingEntry.completed = employee.salaryStats.completedToday;
-    //   existingEntry.failed = employee.salaryStats.failedToday;
-    // }
-
-    // await employee.save();
+    await employee.save();
 
     // ================= SOCKET EMIT =================
 
