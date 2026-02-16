@@ -2,18 +2,7 @@ import Employee from "../models/Employee.js";
 import { io } from "../server.js"; // ✅ Import Socket.io instance
 import { calculateSalary } from "../utils/calculateSalary.js";
 
-const isNewDay = (lastDate) => {
-  if (!lastDate) return true;
 
-  const today = new Date();
-  const last = new Date(lastDate);
-
-  return (
-    today.getFullYear() !== last.getFullYear() ||
-    today.getMonth() !== last.getMonth() ||
-    today.getDate() !== last.getDate()
-  );
-};
 
 
 // 🔹 Get all employees
@@ -143,12 +132,6 @@ export const updateTaskStatus = async (req, res) => {
     if (!task)
       return res.status(404).json({ message: "Task not found" });
 
-    
-
-   
-
-    // ================= REMOVE OLD COUNTS SAFELY =================
-
     const decrement = (field) => {
       if (employee.taskCounts[field] > 0)
         employee.taskCounts[field]--;
@@ -169,16 +152,12 @@ export const updateTaskStatus = async (req, res) => {
         employee.salaryStats.failedToday--;
     }
 
-    // ================= RESET FLAGS =================
-
     task.newTask = false;
     task.active = false;
     task.complete = false;
     task.failed = false;
 
     let fastCompleted = 0;
-
-    // ================= SET NEW STATUS =================
 
     if (status === "new") {
       task.newTask = true;
@@ -193,7 +172,6 @@ export const updateTaskStatus = async (req, res) => {
     if (status === "complete") {
       task.complete = true;
       task.completedAt = new Date();
-
       employee.taskCounts.complete++;
       employee.salaryStats.completedToday++;
 
@@ -212,8 +190,6 @@ export const updateTaskStatus = async (req, res) => {
       employee.salaryStats.failedToday++;
     }
 
-    // ================= SALARY CALCULATION =================
-
     if (status === "complete" || status === "failed") {
       employee.todaySalary = calculateSalary({
         baseSalary: employee.baseSalaryPerDay,
@@ -222,31 +198,8 @@ export const updateTaskStatus = async (req, res) => {
         fastCompleted,
       });
     }
-    
-
-    // ================= UPDATE TODAY ENTRY IN HISTORY =================
-    const todayString = new Date().toDateString();
-    
-    let existingEntry = employee.salaryHistory.find(
-      (s) => new Date(s.date).toDateString() === todayString
-    );
-
-    if (!existingEntry) {
-      employee.salaryHistory.push({
-        date: new Date(),
-        salary: employee.todaySalary,
-        completed: employee.salaryStats.completedToday,
-        failed: employee.salaryStats.failedToday,
-      });
-    } else {
-      existingEntry.salary = employee.todaySalary;
-      existingEntry.completed = employee.salaryStats.completedToday;
-      existingEntry.failed = employee.salaryStats.failedToday;
-    }
 
     await employee.save();
-
-    // ================= SOCKET EMIT =================
 
     io.emit("taskStatusUpdate", {
       employeeId,
@@ -266,6 +219,7 @@ export const updateTaskStatus = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 
 

@@ -70,7 +70,7 @@ const server = http.createServer(app); // <-- ye missing tha
 // ✅ SOCKET.IO SETUP
 export const io = new Server(server, {
   cors: {
-    origin: ["https://emsproject-lh2b.onrender.com" , "http://localhost:5173"],
+    origin: ["https://emsproject-lh2b.onrender.com", "http://localhost:5173"],
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -100,41 +100,59 @@ io.on("connection", (socket) => {
 
 //  DAILY MIDNIGHT SALARY RESET SYSTEM
 
+cron.schedule(
+  "0 0 * * *",
+  async () => {
+    console.log("🕛 Running Midnight Salary Reset...");
 
-cron.schedule("0 0 * * *", async () => {
-  console.log("🕛 Running Midnight Salary Reset...");
+    try {
+      const employees = await Employee.find();
 
-  try {
-    const employees = await Employee.find();
+      for (let emp of employees) {
 
-    for (let emp of employees) {
+        // ✅ Store salary for YESTERDAY (correct accounting date)
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        yesterday.setHours(0, 0, 0, 0);
 
-     
+        const yesterdayString = yesterday.toDateString();
 
-      emp.todaySalary = 0;
-      emp.salaryStats.completedToday = 0;
-      emp.salaryStats.failedToday = 0;
-      emp.salaryStats.bonusPercent = 0;
-      emp.salaryStats.penaltyPercent = 0;
+        const alreadyExists = emp.salaryHistory.some(
+          (entry) =>
+            new Date(entry.date).toDateString() === yesterdayString
+        );
 
-      // 🔥 IMPORTANT
-      emp.lastSalaryResetDate = new Date();
+        if (!alreadyExists) {
+          emp.salaryHistory.push({
+            date: yesterday,
+            salary: emp.todaySalary,
+            completed: emp.salaryStats.completedToday,
+            failed: emp.salaryStats.failedToday,
+          });
+        }
 
-      await emp.save();
+        // ✅ Reset daily stats
+        emp.todaySalary = 0;
+        emp.salaryStats.completedToday = 0;
+        emp.salaryStats.failedToday = 0;
+        emp.salaryStats.bonusPercent = 0;
+        emp.salaryStats.penaltyPercent = 0;
+
+        emp.lastSalaryResetDate = new Date();
+
+        await emp.save();
+      }
+
+      console.log("✅ Daily Reset Completed");
+    } catch (error) {
+      console.error("❌ Cron Reset Error:", error);
     }
-
-    console.log("✅ Daily Reset Completed");
-
-  } catch (error) {
-    console.error("❌ Cron Reset Error:", error);
+  },
+  {
+    timezone: "Asia/Kolkata",
   }
-
-}
-,{
-   timezone: "Asia/Kolkata",
-}
-
 );
+
 
 
 
