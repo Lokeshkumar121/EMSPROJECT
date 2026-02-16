@@ -1,6 +1,6 @@
 import express from "express";
 import mongoose from "mongoose";
-import { getEmployees, addEmployee, updateEmployee, deleteEmployee , addTaskToEmployee, updateTaskStatus } from "../controllers/employeeController.js";
+import { getEmployees, addEmployee, updateEmployee, deleteEmployee, addTaskToEmployee, updateTaskStatus } from "../controllers/employeeController.js";
 import Employee from "../models/Employee.js";
 import Razorpay from "razorpay";
 
@@ -36,7 +36,7 @@ router.get("/:id/monthly-summary", async (req, res) => {
 
     const { id } = req.params;
     console.log("Monthly route hit, ID:", id);
-      console.log("Monthly summary route hit");
+    console.log("Monthly summary route hit");
     console.log("ID:", req.params.id);
 
 
@@ -45,7 +45,7 @@ router.get("/:id/monthly-summary", async (req, res) => {
       return res.status(400).json({ message: "Invalid Employee ID" });
     }
 
-     const employee = await Employee.findById(id);
+    const employee = await Employee.findById(id);
 
     if (!employee) {
       return res.status(404).json({ message: "Employee not found" });
@@ -61,20 +61,32 @@ router.get("/:id/monthly-summary", async (req, res) => {
       return d.getMonth() === month && d.getFullYear() === year;
     });
 
+
+    // ✅ ADD TODAY DATA ALSO (Very Important Fix)
+    const today = new Date();
+    if (today.getMonth() === month && today.getFullYear() === year) {
+      monthlyData.push({
+        date: today,
+        salary: employee.todaySalary,
+        completed: employee.salaryStats.completedToday,
+        failed: employee.salaryStats.failedToday,
+      });
+    }
+
     const totalSalary = monthlyData.reduce(
-  (acc, h) => acc + (h.salary || 0),
-  0
-);
+      (acc, h) => acc + (h.salary || 0),
+      0
+    );
 
-const totalCompleted = monthlyData.reduce(
-  (acc, h) => acc + (h.completed || 0),
-  0
-);
+    const totalCompleted = monthlyData.reduce(
+      (acc, h) => acc + (h.completed || 0),
+      0
+    );
 
-const totalFailed = monthlyData.reduce(
-  (acc, h) => acc + (h.failed || 0),
-  0
-);
+    const totalFailed = monthlyData.reduce(
+      (acc, h) => acc + (h.failed || 0),
+      0
+    );
 
 
     res.json({
@@ -85,7 +97,7 @@ const totalFailed = monthlyData.reduce(
     });
 
   } catch (err) {
-     console.error("MONTHLY ROUTE ERROR:", err);
+    console.error("MONTHLY ROUTE ERROR:", err);
     res.status(500).json({ message: err.message });
   }
 });
@@ -139,12 +151,12 @@ router.post("/:id/create-order", async (req, res) => {
 // 🔹 Pay Salary
 router.post("/:id/pay-salary", async (req, res) => {
   try {
-     const { id } = req.params;
+    const { id } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: "Invalid Employee ID" });
     }
-    
+
     const { amount } = req.body;
 
 
@@ -154,8 +166,8 @@ router.post("/:id/pay-salary", async (req, res) => {
       return res.status(404).json({ message: "Employee not found" });
     }
     if (!employee.salaryPaidHistory) {
-  employee.salaryPaidHistory = [];
-}
+      employee.salaryPaidHistory = [];
+    }
     employee.salaryPaidHistory.push({
       amount,
       date: new Date(),
