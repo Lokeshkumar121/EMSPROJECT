@@ -55,7 +55,8 @@ const employeeSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
-  salaryHistory: [
+  salaryHistory: {
+  type: [
     {
       date: { type: Date, required: true },
       salary: { type: Number, required: true },
@@ -63,6 +64,8 @@ const employeeSchema = new mongoose.Schema({
       failed: { type: Number, default: 0 }
     }
   ],
+  default: []
+},
   // UPI ID
   upiId: {
     type: String

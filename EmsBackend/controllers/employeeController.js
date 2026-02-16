@@ -10,9 +10,9 @@ export const getEmployees = async (req, res) => {
   try {
     const employees = await Employee.find(); // get all employees
 
-     const today = new Date();
+    const today = new Date();
 
-   
+
 
     res.status(200).json(employees);
 
@@ -29,7 +29,8 @@ export const addEmployee = async (req, res) => {
     // Check if email already exists
     const exists = await Employee.findOne({ email });
     if (exists) return res.status(400).json({ message: "Email already exists" });
-
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     const newEmployee = new Employee({
       firstName,
       lastName,
@@ -37,6 +38,15 @@ export const addEmployee = async (req, res) => {
       password,
       tasks: [],
       taskCounts: { newTask: 0, active: 0, complete: 0, failed: 0 },
+      todaySalary: 0,
+      salaryHistory: [
+        {
+          date: today,
+          salary: 0,
+          completed: 0,
+          failed: 0,
+        },
+      ],
     });
 
     const savedEmployee = await newEmployee.save();
