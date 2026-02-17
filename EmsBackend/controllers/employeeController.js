@@ -2,18 +2,11 @@ import Employee from "../models/Employee.js";
 import { io } from "../server.js"; // ✅ Import Socket.io instance
 import { calculateSalary } from "../utils/calculateSalary.js";
 
-
-
-
 // 🔹 Get all employees
 export const getEmployees = async (req, res) => {
   try {
     const employees = await Employee.find(); // get all employees
-
     const today = new Date();
-
-
-
     res.status(200).json(employees);
 
   } catch (err) {
@@ -207,6 +200,10 @@ export const updateTaskStatus = async (req, res) => {
         failed: employee.salaryStats.failedToday,
         fastCompleted,
       });
+
+      employee.todaySalary = salaryData.salary;
+      employee.salaryStats.bonusPercent = salaryData.bonusPercent;
+      employee.salaryStats.penaltyPercent = salaryData.penaltyPercent;
     }
 
     await employee.save();

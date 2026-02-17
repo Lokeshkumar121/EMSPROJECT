@@ -7,11 +7,6 @@ import analyticsRoutes from "./routes/analyticsRoutes.js"
 import Employee from "./models/Employee.js";
 import cron from "node-cron";
 
-
-
-
-
-
 import cors from "cors";
 import http from "http";
 import { Server } from "socket.io";
