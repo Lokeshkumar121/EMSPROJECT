@@ -6,12 +6,13 @@ const Hero = () => {
     <section
       className="relative text-center py-24 px-6 bg-cover bg-center"
       style={{
+        
         backgroundImage:
           "url('https://cdn.prod.website-files.com/6209ea9aee1f965d7fce7c19/649a89c89a17e113b6f49621_empployee%20mngment%20app%20(1).jpg')",
       }}
     >
       {/* Black Overlay */}
-      <div className="absolute inset-0 "></div>
+      <div className="absolute inset-0  bg-transparent "></div>
 
       {/* Content */}
       <div className="relative z-10">
