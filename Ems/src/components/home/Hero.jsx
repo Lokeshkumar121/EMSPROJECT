@@ -11,7 +11,7 @@ const Hero = () => {
       }}
     >
       {/* Black Overlay */}
-      <div className="absolute inset-0 bg-black/70"></div>
+      <div className="absolute inset-0 "></div>
 
       {/* Content */}
       <div className="relative z-10">
