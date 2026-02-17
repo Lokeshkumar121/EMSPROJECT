@@ -194,12 +194,12 @@ export const updateTaskStatus = async (req, res) => {
     }
 
     if (status === "complete" || status === "failed") {
-      employee.todaySalary = calculateSalary({
-        baseSalary: employee.baseSalaryPerDay,
-        completed: employee.salaryStats.completedToday,
-        failed: employee.salaryStats.failedToday,
-        fastCompleted,
-      });
+      const salaryData = calculateSalary({
+    baseSalary: employee.baseSalaryPerDay,
+    completed: employee.salaryStats.completedToday,
+    failed: employee.salaryStats.failedToday,
+    fastCompleted,
+  });
 
       employee.todaySalary = salaryData.salary;
       employee.salaryStats.bonusPercent = salaryData.bonusPercent;

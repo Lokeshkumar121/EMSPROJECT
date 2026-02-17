@@ -4,22 +4,24 @@ export const calculateSalary = ({
   failed,
   fastCompleted,
 }) => {
-  let salary = baseSalary;
+let bonusPercent = Math.min(completed * 10, 50);   // max 50%
+let penaltyPercent = Math.min(failed * 7, 30);     // max 30%
 
-  // ✅ 10% bonus per completed task
-  if (completed > 0) {
-    salary += baseSalary * 0.10 * completed;
-  }
 
-  // ⚡ Fast task bonus
-  if (fastCompleted > 0) {
-    salary += baseSalary * 0.10 * fastCompleted;
-  }
+if (fastCompleted > 0) {
+  bonusPercent = Math.min(bonusPercent + 10, 60);
+}
 
-  // ❌ 7% penalty per failed task
-  if (failed > 0) {
-    salary -= baseSalary * 0.07 * failed;
-  }
+  let salary =
+    baseSalary +
+    (baseSalary * bonusPercent) / 100 -
+    (baseSalary * penaltyPercent) / 100;
 
-  return Math.max(Math.round(salary), 0);
+  
+
+  return {
+    salary: Math.max(Math.round(salary), 0),
+    bonusPercent,
+    penaltyPercent,
+  };
 };
