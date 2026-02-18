@@ -38,7 +38,7 @@ const Newtask = ({data , index, employeeId}) => {
         <button 
         
         onClick={() => { console.log("EMP ID:", employeeId);
-  console.log("TASK INDEX:", index); updateTaskStatus(employeeId, index, "active")}}
+  console.log("TASK INDEX:", index); updateTaskStatus(employeeId, data._id, "active")}}
         className="
           w-full bg-blue-600 hover:bg-blue-700
           text-white text-sm py-2 rounded-lg

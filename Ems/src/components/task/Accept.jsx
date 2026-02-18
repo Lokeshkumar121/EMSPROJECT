@@ -38,7 +38,7 @@ const Accept = ({data, index, employeeId}) => {
       {/* Actions */}
       <div className="flex gap-3 mt-5">
         <button 
-         onClick={() => updateTaskStatus(employeeId, index, "complete")}
+         onClick={() => updateTaskStatus(employeeId, data._id, "complete")}
         className="
           flex-1 bg-green-600/90 hover:bg-green-600
           text-white text-sm py-2 rounded-lg
@@ -48,7 +48,7 @@ const Accept = ({data, index, employeeId}) => {
         </button>
 
         <button 
-        onClick={() => updateTaskStatus(employeeId, index, "failed")}
+        onClick={() => updateTaskStatus(employeeId, data._id, "failed")}
         className="
           flex-1 bg-red-600/90 hover:bg-red-600
           text-white text-sm py-2 rounded-lg

@@ -33,7 +33,7 @@ const AuthProvider = ({ children }) => {
 
   // 🔁 UPDATE TASK STATUS (BACKEND BASED)
     // 🔁 UPDATE TASK STATUS
-  const updateTaskStatus = async (employeeId, taskIndex, status) => {
+  const updateTaskStatus = async (employeeId, taskId, status) => {
     if (!employeeId) {
       console.error("❌ employeeId missing");
       return;
@@ -42,7 +42,7 @@ const AuthProvider = ({ children }) => {
     try {
       const res = await axios.patch(`${API}/tasks/status`, {
         employeeId,
-        taskIndex,
+        taskId,
         status,
       });
 
