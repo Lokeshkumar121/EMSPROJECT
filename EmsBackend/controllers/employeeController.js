@@ -106,7 +106,9 @@ export const updateTaskStatus = async (req, res) => {
 
     await handleDailyReset(employee);
 
-    const task = employee.tasks.id(taskId);
+    const task = employee.tasks.find(
+  (t) => t._id.toString() === taskId.toString()
+);
     if (!task)
       return res.status(404).json({ message: "Task not found" });
 
