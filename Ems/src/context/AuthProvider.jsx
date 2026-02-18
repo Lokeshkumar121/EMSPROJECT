@@ -60,7 +60,7 @@ const AuthProvider = ({ children }) => {
         err.response?.data || err.message
       );
     }
-    fetchEmployees(); // instant UI update
+    // fetchEmployees(); // instant UI update
   };
 
     // ➕ ADD TASK (BACKEND)
