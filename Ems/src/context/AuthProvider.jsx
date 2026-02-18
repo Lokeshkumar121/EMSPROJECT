@@ -46,6 +46,8 @@ const AuthProvider = ({ children }) => {
         status,
       });
 
+console.log("PATCH RESPONSE:", res.data);
+
       const updatedEmployee = res.data;
 
       setUserData(prev =>
