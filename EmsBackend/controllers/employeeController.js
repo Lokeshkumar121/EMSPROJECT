@@ -199,6 +199,8 @@ if (task.failed) {
     employee.salaryStats.penaltyPercent = salaryData.penaltyPercent;
 
     await employee.save();
+    // 🔥 ADD THIS
+io.emit("taskUpdated", employee);
 
     res.status(200).json(employee);
   } catch (error) {
