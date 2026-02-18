@@ -1,232 +1,305 @@
 import Employee from "../models/Employee.js";
-import { io } from "../server.js"; // ✅ Import Socket.io instance
+import { io } from "../server.js";
 import { calculateSalary } from "../utils/calculateSalary.js";
 
-// 🔹 Get all employees
-export const getEmployees = async (req, res) => {
-  try {
-    const employees = await Employee.find(); // get all employees
-    const today = new Date();
-    res.status(200).json(employees);
+/* =====================================================
+   DAILY RESET (Multi-Day Safe + Ledger Correct)
+===================================================== */
+const handleDailyReset = async (employee) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+  let lastReset = new Date(employee.lastSalaryResetDate || today);
+  lastReset.setHours(0, 0, 0, 0);
+
+  if (lastReset >= today) return;
+
+  let firstIteration = true;
+
+  while (lastReset < today) {
+    employee.salaryHistory.push({
+      date: new Date(lastReset),
+      salary: firstIteration ? (employee.todaySalary || 0) : 0,
+      completed: firstIteration
+        ? (employee.salaryStats?.completedToday || 0)
+        : 0,
+      failed: firstIteration
+        ? (employee.salaryStats?.failedToday || 0)
+        : 0,
+    });
+
+    firstIteration = false;
+    lastReset.setDate(lastReset.getDate() + 1);
   }
+
+  employee.todaySalary = 0;
+
+  employee.salaryStats = {
+    completedToday: 0,
+    failedToday: 0,
+    bonusPercent: 0,
+    penaltyPercent: 0,
+  };
+
+  employee.lastSalaryResetDate = today;
+
+  await employee.save();
 };
 
-// 🔹 Add new employee
+
+/* =====================================================
+   ADD EMPLOYEE
+===================================================== */
+
 export const addEmployee = async (req, res) => {
   try {
     const { firstName, lastName, email, password } = req.body;
 
-    // Check if email already exists
     const exists = await Employee.findOne({ email });
-    if (exists) return res.status(400).json({ message: "Email already exists" });
+    if (exists)
+      return res.status(400).json({ message: "Email already exists" });
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+
     const newEmployee = new Employee({
       firstName,
       lastName,
       email,
       password,
+      baseSalaryPerDay: 1000,
       tasks: [],
       taskCounts: { newTask: 0, active: 0, complete: 0, failed: 0 },
       todaySalary: 0,
-      salaryHistory: [
-        {
-          date: today,
-          salary: 0,
-          completed: 0,
-          failed: 0,
-        },
-      ],
+      salaryHistory: [],
+      lastSalaryResetDate: today,
+      salaryStats: {
+        completedToday: 0,
+        failedToday: 0,
+        bonusPercent: 0,
+        penaltyPercent: 0,
+      },
     });
 
-    const savedEmployee = await newEmployee.save();
-    res.status(201).json(savedEmployee);
+    const saved = await newEmployee.save();
+    res.status(201).json(saved);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 };
 
-// 🔹 Update employee info
-export const updateEmployee = async (req, res) => {
-  try {
-    const updatedEmployee = await Employee.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
+/* =====================================================
+   UPDATE TASK STATUS
+===================================================== */
 
-    if (!updatedEmployee) {
-      return res.status(404).json({ message: "Employee not found" });
-    }
-
-    res.status(200).json(updatedEmployee);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-};
-
-
-// 🔹 Delete employee
-export const deleteEmployee = async (req, res) => {
-  try {
-    const deletedEmployee = await Employee.findByIdAndDelete(req.params.id);
-    if (!deletedEmployee) return res.status(404).json({ message: "Employee not found" });
-
-    res.status(200).json({ message: "Employee deleted" });
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-};
-
-// 🔹 Add task to an employee
-export const addTaskToEmployee = async (req, res) => {
-  try {
-    const { employeeId, task } = req.body;
-    const employee = await Employee.findById(employeeId);
-    if (!employee) return res.status(404).json({ message: "Employee not found" });
-
-    // Add task
-    employee.tasks.push({
-      title: task.title,
-      description: task.description,
-      category: task.category,
-      expectedTime: task.expectedTime,
-      newTask: true,
-      active: false,
-      complete: false,
-      failed: false,
-      assignedAt: new Date()
-    });
-    employee.taskCounts.newTask++;
-
-    // Update taskCounts automatically
-    // if (task.newTask) employee.taskCounts.newTask += 1;
-    // if (task.active) employee.taskCounts.active += 1;
-    // if (task.complete) employee.taskCounts.complete += 1;
-    // if (task.failed) employee.taskCounts.failed += 1;
-
-    await employee.save();
-    // 🔔 Emit notification to employee in real-time
-    io.to(employeeId).emit("newTask", {
-      // taskId: task._id || employee.tasks.length - 1,
-      title: task.title,
-      description: task.description,
-    });
-    res.status(200).json(employee);
-  } catch (err) {
-    console.error("ADD TASK ERROR:", err);
-    res.status(500).json({ message: err.message });
-  }
-};
-
-// 🔹 Update task status for an employee
 export const updateTaskStatus = async (req, res) => {
   try {
-    const { employeeId, taskIndex, status } = req.body;
+    const { employeeId, taskId, status } = req.body;
+
+    if (!["new", "active", "complete", "failed"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status" });
+    }
 
     const employee = await Employee.findById(employeeId);
     if (!employee)
       return res.status(404).json({ message: "Employee not found" });
 
-    const task = employee.tasks[taskIndex];
+    await handleDailyReset(employee);
+
+    const task = employee.tasks.id(taskId);
     if (!task)
       return res.status(404).json({ message: "Task not found" });
 
-    const decrement = (field) => {
-      if (employee.taskCounts[field] > 0)
-        employee.taskCounts[field]--;
-    };
+    /* -----------------------------
+       Remove old salary impact
+    ------------------------------ */
 
-    if (task.newTask) decrement("newTask");
-    if (task.active) decrement("active");
+   if (task.complete) {
+  employee.salaryStats.completedToday = Math.max(
+    0,
+    employee.salaryStats.completedToday - 1
+  );
+}
 
-    if (task.complete) {
-      decrement("complete");
-      if (employee.salaryStats.completedToday > 0)
-        employee.salaryStats.completedToday--;
-    }
+if (task.failed) {
+  employee.salaryStats.failedToday = Math.max(
+    0,
+    employee.salaryStats.failedToday - 1
+  );
+}
 
-    if (task.failed) {
-      decrement("failed");
-      if (employee.salaryStats.failedToday > 0)
-        employee.salaryStats.failedToday--;
-    }
+    /* -----------------------------
+       Reset task state
+    ------------------------------ */
 
     task.newTask = false;
     task.active = false;
     task.complete = false;
     task.failed = false;
 
-    let fastCompleted = 0;
+    let fastCompleted = false;
 
-    if (status === "new") {
-      task.newTask = true;
-      employee.taskCounts.newTask++;
-    }
+    /* -----------------------------
+       Apply new status
+    ------------------------------ */
 
-    if (status === "active") {
-      task.active = true;
-      employee.taskCounts.active++;
-    }
+    if (status === "new") task.newTask = true;
+
+    if (status === "active") task.active = true;
 
     if (status === "complete") {
       task.complete = true;
-      task.completedAt = new Date();
-      employee.taskCounts.complete++;
       employee.salaryStats.completedToday++;
 
-      if (
-        task.expectedTime &&
-        task.assignedAt &&
-        (task.completedAt - task.assignedAt) / 60000 <= task.expectedTime
-      ) {
-        fastCompleted = 1;
+      if (task.deadline) {
+        const completionTime = new Date();
+        const deadline = new Date(task.deadline);
+        if (completionTime <= deadline) fastCompleted = true;
       }
     }
 
     if (status === "failed") {
       task.failed = true;
-      employee.taskCounts.failed++;
       employee.salaryStats.failedToday++;
     }
 
-    if (status === "complete" || status === "failed") {
-      const salaryData = calculateSalary({
-    baseSalary: employee.baseSalaryPerDay,
-    completed: employee.salaryStats.completedToday,
-    failed: employee.salaryStats.failedToday,
-    fastCompleted,
-  });
+    /* -----------------------------
+       Recalculate taskCounts safely
+    ------------------------------ */
 
-      employee.todaySalary = salaryData.salary;
-      employee.salaryStats.bonusPercent = salaryData.bonusPercent;
-      employee.salaryStats.penaltyPercent = salaryData.penaltyPercent;
-    }
+    employee.taskCounts = {
+      newTask: 0,
+      active: 0,
+      complete: 0,
+      failed: 0,
+    };
+
+    employee.tasks.forEach((t) => {
+      if (t.newTask) employee.taskCounts.newTask++;
+      if (t.active) employee.taskCounts.active++;
+      if (t.complete) employee.taskCounts.complete++;
+      if (t.failed) employee.taskCounts.failed++;
+    });
+
+    /* -----------------------------
+       Recalculate Salary
+    ------------------------------ */
+
+    const salaryData = calculateSalary({
+      baseSalary: employee.baseSalaryPerDay || 0,
+      completed: employee.salaryStats.completedToday,
+      failed: employee.salaryStats.failedToday,
+      fastCompleted,
+    });
+
+    employee.todaySalary = salaryData.salary;
+    employee.salaryStats.bonusPercent = salaryData.bonusPercent;
+    employee.salaryStats.penaltyPercent = salaryData.penaltyPercent;
 
     await employee.save();
 
-    io.emit("taskStatusUpdate", {
-      employeeId,
-      employeeName: `${employee.firstName} ${employee.lastName}`,
-      status,
-      todaySalary: employee.todaySalary,
+    res.status(200).json(employee);
+  } catch (error) {
+    console.error("Update Task Error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+/* =====================================================
+   ADD TASK
+===================================================== */
+
+export const addTaskToEmployee = async (req, res) => {
+  try {
+    const { employeeId, task } = req.body;
+
+    const employee = await Employee.findById(employeeId);
+    if (!employee)
+      return res.status(404).json({ message: "Employee not found" });
+
+    employee.tasks.push({
+      title: task.title,
+      description: task.description,
+      category: task.category,
+      expectedTime: task.expectedTime,
+      deadline: task.deadline || null,
+      newTask: true,
+      active: false,
+      complete: false,
+      failed: false,
+      assignedAt: new Date(),
     });
 
-    res.status(200).json({
-      message: "Task updated & salary recalculated",
-      todaySalary: employee.todaySalary,
-      stats: employee.salaryStats,
+    employee.taskCounts.newTask++;
+
+    await employee.save();
+
+    io.to(employeeId).emit("newTask", {
+      title: task.title,
+      description: task.description,
     });
 
+    res.status(200).json(employee);
   } catch (err) {
-    console.error("UPDATE TASK ERROR:", err);
+    console.error("Add Task Error:", err);
     res.status(500).json({ message: err.message });
   }
 };
 
+/* =====================================================
+   GET EMPLOYEES (Single Query Optimized)
+===================================================== */
+
+export const getEmployees = async (req, res) => {
+  try {
+    const employees = await Employee.find();
+
+    await Promise.all(employees.map(handleDailyReset));
 
 
+    res.status(200).json(employees);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+/* =====================================================
+   UPDATE EMPLOYEE
+===================================================== */
+export const updateEmployee = async (req, res) => {
+  try {
+    const { id } = req.params;
 
+    const updated = await Employee.findByIdAndUpdate(
+      id,
+      req.body,
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ message: "Employee not found" });
+    }
+
+    res.status(200).json(updated);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+/* =====================================================
+   DELETE EMPLOYEE
+===================================================== */
+export const deleteEmployee = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const deleted = await Employee.findByIdAndDelete(id);
+
+    if (!deleted) {
+      return res.status(404).json({ message: "Employee not found" });
+    }
+
+    res.status(200).json({ message: "Employee deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

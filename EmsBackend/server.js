@@ -4,8 +4,7 @@ import authRoutes from "./routes/authRoutes.js"
 import connectDB from "./config/db.js";
 import employeeRoutes from "./routes/employeeRoutes.js";
 import analyticsRoutes from "./routes/analyticsRoutes.js"
-import Employee from "./models/Employee.js";
-import cron from "node-cron";
+
 
 import cors from "cors";
 import http from "http";
@@ -95,58 +94,7 @@ io.on("connection", (socket) => {
 
 //  DAILY MIDNIGHT SALARY RESET SYSTEM
 
-cron.schedule(
-  "0 0 * * *",
-  async () => {
-    console.log("🕛 Running Midnight Salary Reset...");
 
-    try {
-      const employees = await Employee.find();
-
-      for (let emp of employees) {
-
-        // ✅ Store salary for YESTERDAY (correct accounting date)
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        yesterday.setHours(0, 0, 0, 0);
-
-        const yesterdayString = yesterday.toDateString();
-
-        const alreadyExists = emp.salaryHistory.some(
-          (entry) =>
-            new Date(entry.date).toDateString() === yesterdayString
-        );
-
-        if (!alreadyExists) {
-          emp.salaryHistory.push({
-            date: yesterday,
-            salary: emp.todaySalary,
-            completed: emp.salaryStats.completedToday,
-            failed: emp.salaryStats.failedToday,
-          });
-        }
-
-        // ✅ Reset daily stats
-        emp.todaySalary = 0;
-        emp.salaryStats.completedToday = 0;
-        emp.salaryStats.failedToday = 0;
-        emp.salaryStats.bonusPercent = 0;
-        emp.salaryStats.penaltyPercent = 0;
-
-        emp.lastSalaryResetDate = new Date();
-
-        await emp.save();
-      }
-
-      console.log("✅ Daily Reset Completed");
-    } catch (error) {
-      console.error("❌ Cron Reset Error:", error);
-    }
-  },
-  {
-    timezone: "Asia/Kolkata",
-  }
-);
 
 
 
