@@ -12,14 +12,23 @@ const Alltask = ({ employees, setEmployees, onEmployeeDeleted }) => {
       setEmployees(prev => prev.map(emp =>
         emp._id === updatedEmployee._id
           ? {
-              ...emp,
-              tasks: updatedEmployee.tasks,
-              taskCounts: updatedEmployee.taskCounts,
-              todaySalary: updatedEmployee.todaySalary,
-              salaryStats: updatedEmployee.salaryStats,
-            }
+            ...emp,
+            tasks: updatedEmployee.tasks,
+            taskCounts: updatedEmployee.taskCounts,
+            todaySalary: updatedEmployee.todaySalary,
+            salaryStats: updatedEmployee.salaryStats,
+          }
           : emp
       ));
+      const updatedTask = updatedEmployee.updatedTask;
+      if (updatedTask) {
+        const employeeName = `${updatedEmployee.firstName} ${updatedEmployee.lastName}`;
+        if (updatedTask.complete) {
+          toast.success(`Task "${updatedTask.title}" completed by ${employeeName}! ✅`);
+        } else if (updatedTask.failed) {
+          toast.error(`Task "${updatedTask.title}" failed by ${employeeName} ❌`);
+        }
+      }
     };
 
     socket.on("taskUpdated", handleTaskUpdated);
@@ -82,6 +91,7 @@ const Alltask = ({ employees, setEmployees, onEmployeeDeleted }) => {
                   await fetch(`${API_BASE}/employees/${elem._id}`, { method: "DELETE" });
                   setEmployees(prev => prev.filter(emp => emp._id !== elem._id));
                   if (onEmployeeDeleted) onEmployeeDeleted();
+                  toast.success("Employee deleted successfully! ✅"); // ✅ toast
                 }}
                 className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-lg text-sm"
               >

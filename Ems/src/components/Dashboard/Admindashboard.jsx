@@ -31,6 +31,7 @@ const Admindashboard = ({ changeUser, user }) => {
   // ------------------ Employee Deleted Handler ------------------
   const handleEmployeeDeleted = async () => {
     await fetchEmployees(); // refresh employees after deletion
+     toast.success("Employee added successfully! 🎉");
   };
 
   // ------------------ Socket for real-time task updates ------------------
