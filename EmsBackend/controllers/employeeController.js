@@ -146,10 +146,9 @@ export const updateTaskStatus = async (req, res) => {
     await employee.save();
 
     // 🔥 Emit task updated to all clients
-    io.emit("taskUpdated", {
+    io.to(employee._id.toString()).emit("taskUpdated", {
       _id: employee._id,
       firstName: employee.firstName,
-      lastName: employee.lastName,
       tasks: employee.tasks,
       taskCounts: employee.taskCounts,
       todaySalary: employee.todaySalary,
@@ -191,9 +190,11 @@ export const addTaskToEmployee = async (req, res) => {
     await employee.save();
 
     // 🔥 Emit task added
-    io.emit("taskUpdated", {
+    // 🔥 Emit only to that employee room
+    io.to(employee._id.toString()).emit("taskUpdated", {
       _id: employee._id,
       firstName: employee.firstName,
+      lastName: employee.lastName,
       tasks: employee.tasks,
       taskCounts: employee.taskCounts,
       todaySalary: employee.todaySalary,

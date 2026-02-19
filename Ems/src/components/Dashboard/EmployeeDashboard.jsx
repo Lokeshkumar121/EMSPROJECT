@@ -8,7 +8,7 @@ import socket from "../../socket";
 
 import { useEffect } from "react";
 // import { io } from "socket.io-client";
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import SalaryCard from '../Dashboard/SalaryCard'
 
@@ -26,16 +26,16 @@ const StatusCard = ({ title, subtitle, icon }) => {
     </div>
   )
 }
-const EmployeeDashboard = ({ changeUser , user }) => {
+const EmployeeDashboard = ({ changeUser, user }) => {
   // const {userData} = useContext(Authcontext)
 
-const { userData, fetchEmployees } = useContext(Authcontext);
+  const { userData, fetchEmployees } = useContext(Authcontext);
 
   // read only
   const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'))
   console.log(user)
 
-    // 🔹 Socket connection
+  // 🔹 Socket connection
   useEffect(() => {
     if (!loggedInUser) return;
 
@@ -46,68 +46,63 @@ const { userData, fetchEmployees } = useContext(Authcontext);
     socket.on("taskUpdated", (data) => {
       console.log("🔥 EVENT RECEIVED:", data);
       // palay sound 
+       if (data._id !== loggedInUser._id) return;
       const audio = new Audio("/notification.mp3"); // aap public folder me rakho
-      audio.play();
-       // 🔹 Show popup
-      toast.info(`New Task Assigned: ${data.title}`, {
+      audio.play().catch(() => {});
+      // 🔹 Show popup
+      toast.info(`New Task Assigned: ${data.updatedTask?.title}`, {
         position: "top-right",
         autoClose: 5000,
-        pauseOnHover: true,
-        draggable: true,
       });
       fetchEmployees(); // ✅ REFRESH DATA
       console.log("Notification:", data);
     });
-     socket.on("taskStatusUpdate", (data) => {
-    fetchEmployees(); // 🔥 THIS WAS MISSING PROPERLY
-  });
 
     return () => {
       socket.off("taskUpdated");
-      socket.off("taskStatusUpdate");
     };
-  }, [loggedInUser , fetchEmployees]);
+  }, [loggedInUser?._id]);
 
   // loading state
   if (!userData || userData.length === 0) {
-    return <StatusCard 
-              title="Loading Employees..." 
-              subtitle="Please wait while we fetch the data." 
-              icon="⏳"
-            />
+    return <StatusCard
+      title="Loading Employees..."
+      subtitle="Please wait while we fetch the data."
+      icon="⏳"
+    />
   }
 
   if (!loggedInUser) {
-    return  <StatusCard 
-              title="No User Logged In" 
-              subtitle="Please log in to continue." 
-              icon="❌"
-            />
-  }    
+    return <StatusCard
+      title="No User Logged In"
+      subtitle="Please log in to continue."
+      icon="❌"
+    />
+  }
 
   // find employee
   const employee = userData.find(
     e => e.email?.toLowerCase() === loggedInUser.email?.toLowerCase()
   )
   console.log("LoggedIn:", loggedInUser.email);
-console.log("All employees:", userData.map(e => e.email));
+  console.log("All employees:", userData.map(e => e.email));
 
 
   if (!employee) {
-    return  <StatusCard 
-              title="Employee Not Found" 
-              subtitle="We couldn't find your profile." 
-              icon="⚠️"
-            />
+    return <StatusCard
+      title="Employee Not Found"
+      subtitle="We couldn't find your profile."
+      icon="⚠️"
+    />
   }
 
   return (
     <div className='p-10 bg-[#1c1c1c] text-white h-screen'>
-      <Header changeUser={changeUser} user={loggedInUser}  />
-      <SalaryCard employee={employee}/>
+      <Header changeUser={changeUser} user={loggedInUser} />
+      <SalaryCard employee={employee} />
       <TaskNumberslist data={employee} />
       <Tasklist data={employee} />
-      <ToastContainer /> {/* 🔹 Toast container */}
+
     </div>
   )
 }
