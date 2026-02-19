@@ -91,7 +91,8 @@ const Admindashboard = ({ changeUser, user }) => {
       )}
 
       <CreateTask />
-      <Alltask onEmployeeDeleted={handleEmployeeDeleted} />
+      <Alltask onEmployeeDeleted={handleEmployeeDeleted} employees={employees}
+        setEmployees={setEmployees} />
       <ToastContainer />
     </div>
   )
