@@ -149,6 +149,7 @@ export const updateTaskStatus = async (req, res) => {
     io.emit("taskUpdated", {
       _id: employee._id,
       firstName: employee.firstName,
+      lastName: employee.lastName,
       tasks: employee.tasks,
       taskCounts: employee.taskCounts,
       todaySalary: employee.todaySalary,
