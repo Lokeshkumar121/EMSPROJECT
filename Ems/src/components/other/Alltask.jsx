@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import socket from "../../socket";
 import { API_BASE } from "../../config/api";
@@ -6,6 +6,11 @@ import { toast } from "react-toastify";
 
 const Alltask = ({ employees, setEmployees, onEmployeeDeleted }) => {
   const navigate = useNavigate();
+
+  const successSound = useRef(new Audio("/succes.mp3"));
+  const errorSound = useRef(new Audio("/err.mp3"));
+  const notificationSound = useRef(new Audio("/notification.mp3"));
+
 
   // ✅ Socket listener to fetch updates
   React.useEffect(() => {
@@ -25,9 +30,18 @@ const Alltask = ({ employees, setEmployees, onEmployeeDeleted }) => {
       if (updatedTask) {
         const employeeName = `${updatedEmployee.firstName} ${updatedEmployee.lastName}`;
         if (updatedTask.complete) {
+          successSound.current.currentTime = 0;
+          successSound.current.play().catch(() => { });
           toast.success(`Task "${updatedTask.title}" completed by ${employeeName}! ✅`);
         } else if (updatedTask.failed) {
+          errorSound.current.currentTime = 0;
+          errorSound.current.play().catch(() => { });
           toast.error(`Task "${updatedTask.title}" failed by ${employeeName} ❌`);
+        }
+        else if (updatedTask.active) {
+          notificationSound.current.currentTime = 0;
+          notificationSound.current.play().catch(() => { });
+          toast.info(`Task "${updatedTask.title}" accepted by ${employeeName}! 🚀`);
         }
       }
     };
