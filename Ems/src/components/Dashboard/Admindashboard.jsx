@@ -37,17 +37,24 @@ const Admindashboard = ({ changeUser, user }) => {
   useEffect(() => {
     if (!socket) return;
 
+    const handleEmployeeAdded = (newEmp) => {
+      setEmployees(prev => [...prev, newEmp]);
+    };
+    const handleEmployeeDeleted = (id) => {
+      setEmployees(prev => prev.filter(emp => emp._id !== id));
+    };
+
     const handleTaskUpdated = (updatedEmployee) => {
       setEmployees(prev =>
         prev.map(emp =>
           emp._id === updatedEmployee._id // backend must send full employee object with _id
             ? {
-                ...emp,
-                tasks: updatedEmployee.tasks,
-                taskCounts: updatedEmployee.taskCounts,
-                todaySalary: updatedEmployee.todaySalary,
-                salaryStats: updatedEmployee.salaryStats,
-              }
+              ...emp,
+              tasks: updatedEmployee.tasks,
+              taskCounts: updatedEmployee.taskCounts,
+              todaySalary: updatedEmployee.todaySalary,
+              salaryStats: updatedEmployee.salaryStats,
+            }
             : emp
         )
       );
@@ -71,9 +78,12 @@ const Admindashboard = ({ changeUser, user }) => {
     };
 
     socket.on("taskUpdated", handleTaskUpdated);
-
+    socket.on("employeeAdded", handleEmployeeAdded);
+    socket.on("employeeDeleted", handleEmployeeDeleted);
     return () => {
       socket.off("taskUpdated", handleTaskUpdated);
+      socket.off("employeeAdded", handleEmployeeAdded);
+      socket.off("employeeDeleted", handleEmployeeDeleted);
     };
   }, []);
 
