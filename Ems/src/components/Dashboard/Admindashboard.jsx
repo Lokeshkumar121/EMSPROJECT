@@ -40,14 +40,20 @@ const Admindashboard = ({ changeUser, user }) => {
     const handleTaskUpdated = (updatedEmployee) => {
       setEmployees(prev =>
         prev.map(emp =>
-          emp._id === updatedEmployee._id // backend should send full employee with updated tasks
-            ? { ...emp, ...updatedEmployee }
+          emp._id === updatedEmployee._id // backend must send full employee object with _id
+            ? {
+                ...emp,
+                tasks: updatedEmployee.tasks,
+                taskCounts: updatedEmployee.taskCounts,
+                todaySalary: updatedEmployee.todaySalary,
+                salaryStats: updatedEmployee.salaryStats,
+              }
             : emp
         )
       );
 
       // Show toast for updated task
-      const lastTask = updatedEmployee.tasks?.[updatedEmployee.tasks.length - 1];
+      const lastTask = updatedEmployee.updatedTask;
       if (!lastTask) return;
 
       let sound = "/notification.mp3";

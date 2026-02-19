@@ -201,7 +201,7 @@ if (task.failed) {
     await employee.save();
     // 🔥 ADD THIS
 io.emit("taskUpdated", {
-    employeeId: employee._id,
+  _id: employee._id,
   firstName: employee.firstName,
   tasks: employee.tasks,
   taskCounts: employee.taskCounts,
