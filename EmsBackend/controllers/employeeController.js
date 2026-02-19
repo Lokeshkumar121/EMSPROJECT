@@ -248,7 +248,7 @@ export const deleteEmployee = async (req, res) => {
     const deleted = await Employee.findByIdAndDelete(id);
     if (!deleted) return res.status(404).json({ message: "Employee not found" });
 
-    // 🔥 Emit employee deleted
+    //  Emit employee deleted
     io.emit("employeeDeleted", id);
 
     res.status(200).json({ message: "Employee deleted successfully" });
