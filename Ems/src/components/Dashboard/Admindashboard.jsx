@@ -18,14 +18,14 @@ const Admindashboard = ({ changeUser, user }) => {
     try {
       const res = await fetch(`${API_BASE}/employees`);
       const data = await res.json();
-      setEmployees(data);
+      setEmployees(data); // set state
     } catch (err) {
       console.error("Employees fetch failed", err);
     }
   };
 
   useEffect(() => {
-    fetchEmployees();
+    fetchEmployees(); // load employees on mount
   }, []);
 
   // ------------------ Employee Deleted Handler ------------------
@@ -38,17 +38,16 @@ const Admindashboard = ({ changeUser, user }) => {
     if (!socket) return;
 
     const handleTaskUpdated = (updatedEmployee) => {
-      // Update employees state
       setEmployees(prev =>
         prev.map(emp =>
-          emp._id === updatedEmployee.employeeId
-            ? { ...emp, ...updatedEmployee } // update all info including tasks, taskCounts, todaySalary
+          emp._id === updatedEmployee._id // backend should send full employee with updated tasks
+            ? { ...emp, ...updatedEmployee }
             : emp
         )
       );
 
       // Show toast for updated task
-      const lastTask = updatedEmployee.updatedTask;
+      const lastTask = updatedEmployee.tasks?.[updatedEmployee.tasks.length - 1];
       if (!lastTask) return;
 
       let sound = "/notification.mp3";
@@ -78,7 +77,7 @@ const Admindashboard = ({ changeUser, user }) => {
       <Header changeUser={changeUser} user={user} />
 
       {/* Analytics */}
-      <AdminSalaryAnalytics analytics={employees} />
+      <AdminSalaryAnalytics analytics={employees} /> {/* uses employees state reactively */}
 
       {/* Top Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -100,9 +99,10 @@ const Admindashboard = ({ changeUser, user }) => {
 
       {/* Task Management */}
       <CreateTask />
+
       <Alltask
         employees={employees}
-        setEmployees={setEmployees} // pass state setter for live updates
+        setEmployees={setEmployees} // allow Alltask to update employees
         onEmployeeDeleted={handleEmployeeDeleted}
       />
 
