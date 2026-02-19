@@ -43,7 +43,8 @@ const { userData, fetchEmployees } = useContext(Authcontext);
     socket.emit("joinRoom", loggedInUser._id);  // join personal room
 
     // Listen for new task assignment
-    socket.on("newTask", (data) => {
+    socket.on("taskUpdated", (data) => {
+      console.log("🔥 EVENT RECEIVED:", data);
       // palay sound 
       const audio = new Audio("/notification.mp3"); // aap public folder me rakho
       audio.play();
@@ -62,7 +63,7 @@ const { userData, fetchEmployees } = useContext(Authcontext);
   });
 
     return () => {
-      socket.off("newTask");
+      socket.off("taskUpdated");
       socket.off("taskStatusUpdate");
     };
   }, [loggedInUser , fetchEmployees]);
