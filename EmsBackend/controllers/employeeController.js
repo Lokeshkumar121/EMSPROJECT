@@ -200,7 +200,15 @@ if (task.failed) {
 
     await employee.save();
     // 🔥 ADD THIS
-io.emit("taskUpdated", employee);
+io.emit("taskUpdated", {
+    employeeId: employee._id,
+  firstName: employee.firstName,
+  tasks: employee.tasks,
+  taskCounts: employee.taskCounts,
+  todaySalary: employee.todaySalary,
+  salaryStats: employee.salaryStats,
+  updatedTask: task
+});
 
     res.status(200).json(employee);
   } catch (error) {
