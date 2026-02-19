@@ -40,42 +40,37 @@ const handleEmployeeDeleted = async () => {
   // const socket = io("http://localhost:8080");
     if (!socket) return; // ✅ SAFETY
 
-  socket.on("taskStatusUpdate", (data) => {
-    console.log("🔥 ADMIN RECEIVED:", data);   // ADD THIS
-    // 🔊 Sound based on status
+  socket.on("taskUpdated", (updatedEmployee) => {
+    console.log("🔥 ADMIN RECEIVED:", updatedEmployee); 
     fetchAnalytics();   
+
+    // ✅ Pick the latest task which changed
+    const lastTask = updatedEmployee.tasks[updatedEmployee.tasks.length - 1];
+
     let sound = "/notification.mp3";
-    //  console.log("📡 Task updated → refetching");
-    // window.dispatchEvent(new Event("refreshTasks"));
-
-    if (data.status === "complete") sound = "/succes.mp3";
-    if (data.status === "failed") sound = "/err.mp3";
-
+    if (lastTask.complete) sound = "/succes.mp3";
+    if (lastTask.failed) sound = "/err.mp3";
     new Audio(sound).play();
 
-    // 🎨 Toast based on status
-    if (data.status === "failed") {
-      toast.error(
-        `❌ ${data.employeeName} FAILED the task`,
-        { position: "top-right", autoClose: 6000 }
-      );
+    if (lastTask.failed) {
+      toast.error(`❌ ${updatedEmployee.firstName} FAILED task "${lastTask.title}"`, { position: "top-right", autoClose: 6000 });
     } 
-    else if (data.status === "complete") {
-      toast.success(
-        `${data.employeeName} COMPLETED the task`,
-        { position: "top-right", autoClose: 5000 }
-      );
+    else if (lastTask.complete) {
+      toast.success(`${updatedEmployee.firstName} COMPLETED task "${lastTask.title}"`, { position: "top-right", autoClose: 5000 });
     } 
     else {
-      toast.info(
-        `${data.employeeName} updated task to ${data.status}`,
-        { position: "top-right", autoClose: 4000 }
-      );
+      toast.info(`${updatedEmployee.firstName} updated task to "${lastTask.title}"`, { position: "top-right", autoClose: 4000 });
     }
-  });
+});
+
+// ✅ Correct event off
+return () => {
+  socket.off("taskUpdated");
+};
+
 
   return () => {
-  socket.off("taskStatusUpdate");
+  socket.off("taskUpdated");
 };
 }, []);
 
