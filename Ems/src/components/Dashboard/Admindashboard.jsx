@@ -63,12 +63,6 @@ const handleEmployeeDeleted = async () => {
     }
 });
 
-// ✅ Correct event off
-return () => {
-  socket.off("taskUpdated");
-};
-
-
   return () => {
   socket.off("taskUpdated");
 };
