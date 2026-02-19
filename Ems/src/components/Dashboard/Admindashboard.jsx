@@ -51,43 +51,44 @@ const Admindashboard = ({ changeUser, user }) => {
 
 
 
-useEffect(() => {
-  if (!socket) return;
+  useEffect(() => {
+    // const socket = io("http://localhost:8080");
+    if (!socket) return; // ✅ SAFETY
 
-  socket.on("taskUpdated", (updatedEmployee) => {
-    console.log("🔥 ADMIN RECEIVED:", updatedEmployee);
+    socket.on("taskUpdated", (updatedEmployee) => {
+      console.log("🔥 ADMIN RECEIVED:", updatedEmployee);
+      fetchAnalytics();
 
-    // ✅ Update employees state directly
+       // ✅ Update employees state directly
     setEmployees(prev => prev.map(emp =>
       emp._id === updatedEmployee.employeeId
-        ? { ...emp, ...updatedEmployee, tasks: updatedEmployee.tasks }
+        ? { ...emp, ...updatedEmployee }
         : emp
     ));
 
-    // ✅ Use updatedTask from backend emit
-    const lastTask = updatedEmployee.updatedTask;
+      // ✅ Pick the latest task which changed
+      const lastTask = updatedEmployee.tasks[updatedEmployee.tasks.length - 1];
 
-    if (!lastTask) return;
+      let sound = "/notification.mp3";
+      if (lastTask.complete) sound = "/succes.mp3";
+      if (lastTask.failed) sound = "/err.mp3";
+      new Audio(sound).play();
 
-    let sound = "/notification.mp3";
-    if (lastTask.complete) sound = "/succes.mp3";
-    if (lastTask.failed) sound = "/err.mp3";
-    new Audio(sound).play();
+      if (lastTask.failed) {
+        toast.error(`❌ ${updatedEmployee.firstName} FAILED task "${lastTask.title}"`, { position: "top-right", autoClose: 6000 });
+      }
+      else if (lastTask.complete) {
+        toast.success(`${updatedEmployee.firstName} COMPLETED task "${lastTask.title}"`, { position: "top-right", autoClose: 5000 });
+      }
+      else {
+        toast.info(`${updatedEmployee.firstName} updated task to "${lastTask.title}"`, { position: "top-right", autoClose: 4000 });
+      }
+    });
 
-    if (lastTask.failed) {
-      toast.error(`❌ ${updatedEmployee.firstName} FAILED task "${lastTask.title}"`, { position: "top-right", autoClose: 6000 });
-    } else if (lastTask.complete) {
-      toast.success(`${updatedEmployee.firstName} COMPLETED task "${lastTask.title}"`, { position: "top-right", autoClose: 5000 });
-    } else {
-      toast.info(`${updatedEmployee.firstName} updated task "${lastTask.title}"`, { position: "top-right", autoClose: 4000 });
-    }
-  });
-
-  return () => {
-    socket.off("taskUpdated");
-  };
-}, []);
-
+    return () => {
+      socket.off("taskUpdated");
+    };
+  }, []);
 
 
   return (
