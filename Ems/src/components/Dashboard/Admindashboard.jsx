@@ -45,37 +45,26 @@ const Admindashboard = ({ changeUser, user }) => {
     };
 
     const handleTaskUpdated = (updatedEmployee) => {
-      setEmployees(prev =>
-        prev.map(emp =>
-          emp._id === updatedEmployee._id // backend must send full employee object with _id
-            ? {
-              ...emp,
-              tasks: updatedEmployee.tasks,
-              taskCounts: updatedEmployee.taskCounts,
-              todaySalary: updatedEmployee.todaySalary,
-              salaryStats: updatedEmployee.salaryStats,
-            }
-            : emp
-        )
+  setEmployees(prev => {
+    const exists = prev.some(emp => emp._id === updatedEmployee._id);
+    if (exists) {
+      return prev.map(emp =>
+        emp._id === updatedEmployee._id
+          ? {
+            ...emp,
+            tasks: updatedEmployee.tasks,
+            taskCounts: updatedEmployee.taskCounts,
+            todaySalary: updatedEmployee.todaySalary,
+            salaryStats: updatedEmployee.salaryStats,
+          }
+          : emp
       );
+    } else {
+      return [...prev, updatedEmployee];
+    }
+  });
+};
 
-      // Show toast for updated task
-      const lastTask = updatedEmployee.updatedTask;
-      if (!lastTask) return;
-
-      let sound = "/notification.mp3";
-      if (lastTask.complete) sound = "/succes.mp3";
-      if (lastTask.failed) sound = "/err.mp3";
-      new Audio(sound).play();
-
-      if (lastTask.failed) {
-        toast.error(`❌ ${updatedEmployee.firstName} FAILED task "${lastTask.title}"`, { position: "top-right", autoClose: 6000 });
-      } else if (lastTask.complete) {
-        toast.success(`${updatedEmployee.firstName} COMPLETED task "${lastTask.title}"`, { position: "top-right", autoClose: 5000 });
-      } else {
-        toast.info(`${updatedEmployee.firstName} updated task "${lastTask.title}"`, { position: "top-right", autoClose: 4000 });
-      }
-    };
 
     socket.on("taskUpdated", handleTaskUpdated);
     socket.on("employeeAdded", handleEmployeeAdded);
