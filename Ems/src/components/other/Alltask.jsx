@@ -3,11 +3,13 @@ import { Authcontext } from "../../context/AuthProvider";
 import { useNavigate } from "react-router-dom";
 import socket from "../../socket";
 
-const Alltask = ({ onEmployeeDeleted }) => {
+const Alltask = ({ onEmployeeDeleted , employees, setEmployees, }) => {
   const { userData, deleteEmployee, fetchEmployees } =
     useContext(Authcontext);
 
   const navigate = useNavigate();
+
+  
 
   // ✅ Single clean socket listener
   useEffect(() => {
