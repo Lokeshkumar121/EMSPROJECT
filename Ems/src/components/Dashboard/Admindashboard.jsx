@@ -40,39 +40,33 @@ const Admindashboard = ({ changeUser, user }) => {
     const handleEmployeeAdded = (newEmp) => {
       setEmployees(prev => [...prev, newEmp]);
     };
+
     const handleEmployeeDeleted = (id) => {
       setEmployees(prev => prev.filter(emp => emp._id !== id));
     };
 
     const handleTaskUpdated = (updatedEmployee) => {
-  setEmployees(prev => {
-    const exists = prev.some(emp => emp._id === updatedEmployee._id);
-    if (exists) {
-      return prev.map(emp =>
+      setEmployees(prev => prev.map(emp =>
         emp._id === updatedEmployee._id
           ? {
-            ...emp,
-            tasks: updatedEmployee.tasks,
-            taskCounts: updatedEmployee.taskCounts,
-            todaySalary: updatedEmployee.todaySalary,
-            salaryStats: updatedEmployee.salaryStats,
-          }
+              ...emp,
+              tasks: updatedEmployee.tasks,
+              taskCounts: updatedEmployee.taskCounts,
+              todaySalary: updatedEmployee.todaySalary,
+              salaryStats: updatedEmployee.salaryStats,
+            }
           : emp
-      );
-    } else {
-      return [...prev, updatedEmployee];
-    }
-  });
-};
+      ));
+    };
 
-
-    socket.on("taskUpdated", handleTaskUpdated);
     socket.on("employeeAdded", handleEmployeeAdded);
     socket.on("employeeDeleted", handleEmployeeDeleted);
+    socket.on("taskUpdated", handleTaskUpdated);
+
     return () => {
-      socket.off("taskUpdated", handleTaskUpdated);
       socket.off("employeeAdded", handleEmployeeAdded);
       socket.off("employeeDeleted", handleEmployeeDeleted);
+      socket.off("taskUpdated", handleTaskUpdated);
     };
   }, []);
 
