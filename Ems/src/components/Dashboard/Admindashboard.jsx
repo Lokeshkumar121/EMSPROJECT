@@ -13,7 +13,7 @@ const Admindashboard = ({ changeUser, user }) => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [employees, setEmployees] = useState([]);
 
-  // ------------------ Fetch Employees once ------------------
+  // ------------------ Fetch Employees ------------------
   const fetchEmployees = async () => {
     try {
       const res = await fetch(`${API_BASE}/employees`);
@@ -28,20 +28,21 @@ const Admindashboard = ({ changeUser, user }) => {
     fetchEmployees();
   }, []);
 
+  // ------------------ Employee Deleted Handler ------------------
   const handleEmployeeDeleted = async () => {
-    await fetchEmployees(); // refresh employees
+    await fetchEmployees(); // refresh employees after deletion
   };
 
   // ------------------ Socket for real-time task updates ------------------
   useEffect(() => {
     if (!socket) return;
 
-    socket.on("taskUpdated", (updatedEmployee) => {
+    const handleTaskUpdated = (updatedEmployee) => {
       // Update employees state
       setEmployees(prev =>
         prev.map(emp =>
           emp._id === updatedEmployee.employeeId
-            ? { ...emp, ...updatedEmployee, tasks: updatedEmployee.tasks }
+            ? { ...emp, ...updatedEmployee } // update all info including tasks, taskCounts, todaySalary
             : emp
         )
       );
@@ -62,18 +63,24 @@ const Admindashboard = ({ changeUser, user }) => {
       } else {
         toast.info(`${updatedEmployee.firstName} updated task "${lastTask.title}"`, { position: "top-right", autoClose: 4000 });
       }
-    });
+    };
+
+    socket.on("taskUpdated", handleTaskUpdated);
 
     return () => {
-      socket.off("taskUpdated");
+      socket.off("taskUpdated", handleTaskUpdated);
     };
   }, []);
 
   return (
     <div className='min-h-screen w-full p-4 sm:p-7 bg-[#1c1c1c] text-white flex flex-col gap-6'>
+      {/* Header */}
       <Header changeUser={changeUser} user={user} />
-      <AdminSalaryAnalytics analytics={employees} /> {/* ✅ use employees state */}
-      
+
+      {/* Analytics */}
+      <AdminSalaryAnalytics analytics={employees} />
+
+      {/* Top Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <button
           onClick={() => setShowAddForm(true)}
@@ -83,6 +90,7 @@ const Admindashboard = ({ changeUser, user }) => {
         </button>
       </div>
 
+      {/* Registration Form Modal */}
       {showAddForm && (
         <RegistrationForm
           onClose={() => setShowAddForm(false)}
@@ -90,11 +98,17 @@ const Admindashboard = ({ changeUser, user }) => {
         />
       )}
 
+      {/* Task Management */}
       <CreateTask />
-      <Alltask onEmployeeDeleted={handleEmployeeDeleted}  />
+      <Alltask
+        employees={employees}
+        setEmployees={setEmployees} // pass state setter for live updates
+        onEmployeeDeleted={handleEmployeeDeleted}
+      />
+
       <ToastContainer />
     </div>
-  )
-}
+  );
+};
 
 export default Admindashboard;
