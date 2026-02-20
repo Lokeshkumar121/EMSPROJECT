@@ -146,6 +146,7 @@ export const updateTaskStatus = async (req, res) => {
     await employee.save();
 
     // 🔥 Notify Employee (NO POPUP)
+    
     io.to(`employee_${employee._id}`).emit("taskStatusChanged", {
       employeeId: employee._id,
       tasks: employee.tasks,
@@ -162,6 +163,20 @@ export const updateTaskStatus = async (req, res) => {
       todaySalary: employee.todaySalary,
       salaryStats: employee.salaryStats,
     });
+    let actionText = "";
+
+    if (status === "active") actionText = "accepted";
+    if (status === "complete") actionText = "completed";
+    if (status === "failed") actionText = "failed";
+
+    if (actionText) {
+      io.to("adminRoom").emit("employeeActionNotification", {
+        employeeName: `${employee.firstName} ${employee.lastName}`,
+        taskTitle: task.title,
+        status: actionText,
+      });
+    }
+
 
     res.status(200).json(employee);
   } catch (error) {

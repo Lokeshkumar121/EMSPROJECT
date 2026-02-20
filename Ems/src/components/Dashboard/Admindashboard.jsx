@@ -45,18 +45,21 @@ const Admindashboard = ({ changeUser, user }) => {
       )
     );
   });
+    // 🔔 Employee Accept / Complete / Failed Toast
+  socket.on("employeeActionNotification", (data) => {
+    toast.info(
+      `${data.employeeName} ${data.status} task: ${data.taskTitle}`
+    );
+  });
 
   return () => {
     socket.off("taskUpdatedForAdmin");
+    socket.off("employeeActionNotification");
   };
 
 }, []);
 
-  // ------------------ Employee Deleted Handler ------------------
-  const handleEmployeeDeleted = async () => {
-    await fetchEmployees(); // refresh employees after deletion
-     toast.success("Employee added successfully! 🎉");
-  };
+
 
   // ------------------ Socket for real-time task updates ------------------
   useEffect(() => {
@@ -113,7 +116,7 @@ const Admindashboard = ({ changeUser, user }) => {
       <Alltask
         employees={employees}
         setEmployees={setEmployees} // allow Alltask to update employees
-        onEmployeeDeleted={handleEmployeeDeleted}
+        onEmployeeDeleted={() => {}}
       />
 
       
