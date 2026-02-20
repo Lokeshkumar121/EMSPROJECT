@@ -8,10 +8,25 @@ import 'react-toastify/dist/ReactToastify.css';
 import socket from "../../socket";
 import { API_BASE } from "../../config/api";
 import AdminSalaryAnalytics from "../../components/AdminSalaryAnalytics";
+import { useRef } from 'react';
 
 const Admindashboard = ({ changeUser, user }) => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [employees, setEmployees] = useState([]);
+  const acceptSound = useRef(null);
+  const completeSound = useRef(null);
+  const failedSound = useRef(null);
+
+    // ------------------ Load Sounds Once ------------------
+  useEffect(() => {
+    acceptSound.current = new Audio("notification.mp3");
+    completeSound.current = new Audio("succes.mp3");
+    failedSound.current = new Audio("err.mp3");
+
+    acceptSound.current.volume = 1;
+    completeSound.current.volume = 1;
+    failedSound.current.volume = 1;
+  }, []);
 
   // ------------------ Fetch Employees ------------------
   const fetchEmployees = async () => {
@@ -25,64 +40,85 @@ const Admindashboard = ({ changeUser, user }) => {
   };
 
   useEffect(() => {
-  fetchEmployees();
-}, []);
+    fetchEmployees();
+  }, []);
 
- useEffect(() => {
+  useEffect(() => {
 
-  socket.emit("joinAdminRoom");
+    socket.emit("joinAdminRoom");
 
-  socket.on("taskUpdatedForAdmin", (data) => {
-    setEmployees(prev =>
-      prev.map(emp =>
-        emp._id === data.employeeId
-          ? { ...emp,
-    tasks: data.tasks,
-    taskCounts: data.taskCounts,
-    todaySalary: data.todaySalary,
-    salaryStats: data.salaryStats, }
-          : emp
-      )
-    );
-  });
+    socket.on("taskUpdatedForAdmin", (data) => {
+      setEmployees(prev =>
+        prev.map(emp =>
+          emp._id === data.employeeId
+            ? {
+              ...emp,
+              tasks: data.tasks,
+              taskCounts: data.taskCounts,
+              todaySalary: data.todaySalary,
+              salaryStats: data.salaryStats,
+            }
+            : emp
+        )
+      );
+    });
     // 🔔 Employee Accept / Complete / Failed Toast
-  socket.on("employeeActionNotification", (data) => {
-    toast.info(
-      `${data.employeeName} ${data.status} task: ${data.taskTitle}`
-    );
-  });
+    socket.on("employeeActionNotification", (data) => {
+      const message = `${data.employeeName} ${data.status} task: ${data.taskTitle}`;
 
-  return () => {
-    socket.off("taskUpdatedForAdmin");
-    socket.off("employeeActionNotification");
-  };
+      if (data.status === "accepted") {
+        acceptSound.play();
+        toast.info(message, {
+          style: { background: "#2563eb", color: "#fff" } // Blue
+        });
+      }
 
-}, []);
+      else if (data.status === "completed") {
+        completeSound.play();
+        toast.success(message, {
+          style: { background: "#16a34a", color: "#fff" } // Green
+        });
+      }
+
+      else if (data.status === "failed") {
+        failedSound.play();
+        toast.error(message, {
+          style: { background: "#dc2626", color: "#fff" } // Red
+        });
+      }
+    });
+
+    return () => {
+      socket.off("taskUpdatedForAdmin");
+      socket.off("employeeActionNotification");
+    };
+
+  }, []);
 
 
 
   // ------------------ Socket for real-time task updates ------------------
   useEffect(() => {
-  if (!socket) return;
+    if (!socket) return;
 
-  const handleEmployeeAdded = (newEmp) => {
-    setEmployees(prev => [...prev, newEmp]);
-    toast.success("Employee added successfully! 🎉");
-  };
+    const handleEmployeeAdded = (newEmp) => {
+      setEmployees(prev => [...prev, newEmp]);
+      toast.success("Employee added successfully! 🎉");
+    };
 
-  const handleEmployeeDeletedSocket = (id) => {
-    setEmployees(prev => prev.filter(emp => emp._id !== id));
-    toast.success("Employee deleted successfully!");
-  };
+    const handleEmployeeDeletedSocket = (id) => {
+      setEmployees(prev => prev.filter(emp => emp._id !== id));
+      toast.success("Employee deleted successfully!");
+    };
 
-  socket.on("employeeAdded", handleEmployeeAdded);
-  socket.on("employeeDeleted", handleEmployeeDeletedSocket);
+    socket.on("employeeAdded", handleEmployeeAdded);
+    socket.on("employeeDeleted", handleEmployeeDeletedSocket);
 
-  return () => {
-    socket.off("employeeAdded", handleEmployeeAdded);
-    socket.off("employeeDeleted", handleEmployeeDeletedSocket);
-  };
-}, []);
+    return () => {
+      socket.off("employeeAdded", handleEmployeeAdded);
+      socket.off("employeeDeleted", handleEmployeeDeletedSocket);
+    };
+  }, []);
 
   return (
     <div className='min-h-screen w-full p-4 sm:p-7 bg-[#1c1c1c] text-white flex flex-col gap-6'>
@@ -116,10 +152,10 @@ const Admindashboard = ({ changeUser, user }) => {
       <Alltask
         employees={employees}
         setEmployees={setEmployees} // allow Alltask to update employees
-        onEmployeeDeleted={() => {}}
+        onEmployeeDeleted={() => { }}
       />
 
-      
+
     </div>
   );
 };
