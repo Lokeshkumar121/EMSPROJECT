@@ -60,40 +60,26 @@ const Admindashboard = ({ changeUser, user }) => {
 
   // ------------------ Socket for real-time task updates ------------------
   useEffect(() => {
-    if (!socket) return;
+  if (!socket) return;
 
-    const handleEmployeeAdded = (newEmp) => {
-      setEmployees(prev => [...prev, newEmp]);
-    };
+  const handleEmployeeAdded = (newEmp) => {
+    setEmployees(prev => [...prev, newEmp]);
+    toast.success("Employee added successfully! 🎉");
+  };
 
-    const handleEmployeeDeleted = (id) => {
-      setEmployees(prev => prev.filter(emp => emp._id !== id));
-    };
+  const handleEmployeeDeletedSocket = (id) => {
+    setEmployees(prev => prev.filter(emp => emp._id !== id));
+    toast.success("Employee deleted successfully!");
+  };
 
-    const handleTaskUpdated = (updatedEmployee) => {
-      setEmployees(prev => prev.map(emp =>
-        emp._id === updatedEmployee._id
-          ? {
-              ...emp,
-              tasks: updatedEmployee.tasks,
-              taskCounts: updatedEmployee.taskCounts,
-              todaySalary: updatedEmployee.todaySalary,
-              salaryStats: updatedEmployee.salaryStats,
-            }
-          : emp
-      ));
-    };
+  socket.on("employeeAdded", handleEmployeeAdded);
+  socket.on("employeeDeleted", handleEmployeeDeletedSocket);
 
-    socket.on("employeeAdded", handleEmployeeAdded);
-    socket.on("employeeDeleted", handleEmployeeDeleted);
-    // socket.on("taskUpdated", handleTaskUpdated);
-
-    return () => {
-      socket.off("employeeAdded", handleEmployeeAdded);
-      socket.off("employeeDeleted", handleEmployeeDeleted);
-      // socket.off("taskUpdated", handleTaskUpdated);
-    };
-  }, []);
+  return () => {
+    socket.off("employeeAdded", handleEmployeeAdded);
+    socket.off("employeeDeleted", handleEmployeeDeletedSocket);
+  };
+}, []);
 
   return (
     <div className='min-h-screen w-full p-4 sm:p-7 bg-[#1c1c1c] text-white flex flex-col gap-6'>
@@ -130,7 +116,7 @@ const Admindashboard = ({ changeUser, user }) => {
         onEmployeeDeleted={handleEmployeeDeleted}
       />
 
-      <ToastContainer />
+      
     </div>
   );
 };
