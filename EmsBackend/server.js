@@ -74,11 +74,14 @@ export const io = new Server(server, {
 io.on("connection", (socket) => {
   // console.log("🔔 New user connected:", socket.id);
 
-  // Employee joins their personal room
-  socket.on("joinRoom", (userId) => {
-    socket.join(userId);
-    // console.log(`User ${userId} joined their room`);
+  socket.on("joinEmployeeRoom", (employeeId) => {
+    socket.join(`employee_${employeeId}`);
   });
+
+    socket.on("joinAdminRoom", () => {
+    socket.join("adminRoom");
+  });
+  
 
   // Employee task status update
   socket.on("taskStatusUpdate", (data) => {

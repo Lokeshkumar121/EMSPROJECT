@@ -24,9 +24,25 @@ const Admindashboard = ({ changeUser, user }) => {
     }
   };
 
-  useEffect(() => {
-    fetchEmployees(); // load employees on mount
-  }, []);
+ useEffect(() => {
+
+  socket.emit("joinAdminRoom");
+
+  socket.on("taskUpdatedForAdmin", (data) => {
+    setEmployees(prev =>
+      prev.map(emp =>
+        emp._id === data.employeeId
+          ? { ...emp, ...data }
+          : emp
+      )
+    );
+  });
+
+  return () => {
+    socket.off("taskUpdatedForAdmin");
+  };
+
+}, []);
 
   // ------------------ Employee Deleted Handler ------------------
   const handleEmployeeDeleted = async () => {
@@ -62,12 +78,12 @@ const Admindashboard = ({ changeUser, user }) => {
 
     socket.on("employeeAdded", handleEmployeeAdded);
     socket.on("employeeDeleted", handleEmployeeDeleted);
-    socket.on("taskUpdated", handleTaskUpdated);
+    // socket.on("taskUpdated", handleTaskUpdated);
 
     return () => {
       socket.off("employeeAdded", handleEmployeeAdded);
       socket.off("employeeDeleted", handleEmployeeDeleted);
-      socket.off("taskUpdated", handleTaskUpdated);
+      // socket.off("taskUpdated", handleTaskUpdated);
     };
   }, []);
 

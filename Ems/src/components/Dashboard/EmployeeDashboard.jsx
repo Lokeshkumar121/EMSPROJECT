@@ -40,26 +40,33 @@ const EmployeeDashboard = ({ changeUser, user }) => {
     if (!loggedInUser) return;
 
     // const socket = io("http://localhost:8080"); // backend URL
-    socket.emit("joinRoom", loggedInUser._id);  // join personal room
+    socket.emit("joinEmployeeRoom", loggedInUser._id);
 
     // Listen for new task assignment
-    socket.on("taskUpdated", (data) => {
-      console.log("🔥 EVENT RECEIVED:", data);
-      // palay sound 
-       if (data._id !== loggedInUser._id) return;
-      const audio = new Audio("/notification.mp3"); // aap public folder me rakho
-      audio.play().catch(() => {});
-      // 🔹 Show popup
-      toast.info(`New Task Assigned: ${data.updatedTask?.title}`, {
-        position: "top-right",
-        autoClose: 5000,
-      });
-      fetchEmployees(); // ✅ REFRESH DATA
-      console.log("Notification:", data);
+   
+  // 🔔 NEW TASK ONLY
+  socket.on("taskAssigned", (data) => {
+    if (data.employeeId !== loggedInUser._id) return;
+
+    const audio = new Audio("/notification.mp3");
+    audio.play().catch(() => {});
+
+    toast.info(`New Task Assigned: ${data.task?.title}`, {
+      position: "top-right",
+      autoClose: 5000,
     });
 
+    fetchEmployees();
+  });
+  // 🔄 Accept / Complete → Just Refresh
+  socket.on("taskStatusChanged", (data) => {
+    if (data.employeeId !== loggedInUser._id) return;
+    fetchEmployees();
+  });
+
     return () => {
-      socket.off("taskUpdated");
+        socket.off("taskAssigned");
+    socket.off("taskStatusChanged");
     };
   }, [loggedInUser?._id]);
 

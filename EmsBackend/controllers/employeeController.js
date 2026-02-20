@@ -145,15 +145,22 @@ export const updateTaskStatus = async (req, res) => {
 
     await employee.save();
 
-    // 🔥 Emit task updated to all clients
-    io.to(employee._id.toString()).emit("taskUpdated", {
-      _id: employee._id,
-      firstName: employee.firstName,
+    // 🔥 Notify Employee (NO POPUP)
+    io.to(`employee_${employee._id}`).emit("taskStatusChanged", {
+      employeeId: employee._id,
       tasks: employee.tasks,
       taskCounts: employee.taskCounts,
       todaySalary: employee.todaySalary,
       salaryStats: employee.salaryStats,
-      updatedTask: task,
+    });
+
+    // 🔥 Notify Admin Dashboard
+    io.to("adminRoom").emit("taskUpdatedForAdmin", {
+      employeeId: employee._id,
+      tasks: employee.tasks,
+      taskCounts: employee.taskCounts,
+      todaySalary: employee.todaySalary,
+      salaryStats: employee.salaryStats,
     });
 
     res.status(200).json(employee);
@@ -189,17 +196,21 @@ export const addTaskToEmployee = async (req, res) => {
 
     await employee.save();
 
-    // 🔥 Emit task added
-    // 🔥 Emit only to that employee room
-    io.to(employee._id.toString()).emit("taskUpdated", {
-      _id: employee._id,
-      firstName: employee.firstName,
-      lastName: employee.lastName,
+    const newTask = employee.tasks[employee.tasks.length - 1];
+
+    // 🔥 Notify Employee (NEW TASK ONLY)
+    io.to(`employee_${employee._id}`).emit("taskAssigned", {
+      employeeId: employee._id,
+      task: newTask,
+    });
+
+    // 🔥 Notify Admin Dashboard
+    io.to("adminRoom").emit("taskUpdatedForAdmin", {
+      employeeId: employee._id,
       tasks: employee.tasks,
       taskCounts: employee.taskCounts,
       todaySalary: employee.todaySalary,
       salaryStats: employee.salaryStats,
-      updatedTask: employee.tasks[employee.tasks.length - 1],
     });
 
     res.status(200).json(employee);
