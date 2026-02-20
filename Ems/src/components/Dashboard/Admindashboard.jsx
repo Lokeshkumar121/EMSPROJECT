@@ -24,6 +24,10 @@ const Admindashboard = ({ changeUser, user }) => {
     }
   };
 
+  useEffect(() => {
+  fetchEmployees();
+}, []);
+
  useEffect(() => {
 
   socket.emit("joinAdminRoom");
@@ -32,7 +36,11 @@ const Admindashboard = ({ changeUser, user }) => {
     setEmployees(prev =>
       prev.map(emp =>
         emp._id === data.employeeId
-          ? { ...emp, ...data }
+          ? { ...emp,
+    tasks: data.tasks,
+    taskCounts: data.taskCounts,
+    todaySalary: data.todaySalary,
+    salaryStats: data.salaryStats, }
           : emp
       )
     );
