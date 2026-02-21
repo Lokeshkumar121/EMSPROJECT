@@ -42,7 +42,7 @@ setUserData(prev => {
 if (onEmployeeAdded) {
   onEmployeeAdded();   // 🔥 IMPORTANT
 }
-      toast.success("Employee added successfully!");
+      
       setFirstName(""); setLastName(""); setEmail(""); setPassword("");
       onClose();
 

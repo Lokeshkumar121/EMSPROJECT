@@ -111,7 +111,7 @@ const Admindashboard = ({ changeUser, user }) => {
 
     const handleEmployeeDeletedSocket = (id) => {
       setEmployees(prev => prev.filter(emp => emp._id.toString()  !== id.toString() ));
-      toast.success("Employee deleted successfully!");
+      
     };
 
     socket.on("employeeAdded", handleEmployeeAdded);
