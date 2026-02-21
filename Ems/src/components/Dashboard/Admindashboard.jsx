@@ -19,9 +19,9 @@ const Admindashboard = ({ changeUser, user }) => {
 
     // ------------------ Load Sounds Once ------------------
   useEffect(() => {
-    acceptSound.current = new Audio("notification.mp3");
-    completeSound.current = new Audio("succes.mp3");
-    failedSound.current = new Audio("err.mp3");
+    acceptSound.current = new Audio("/notification.mp3");
+    completeSound.current = new Audio("/succes.mp3");
+    failedSound.current = new Audio("/err.mp3");
 
     acceptSound.current.volume = 1;
     completeSound.current.volume = 1;
@@ -53,10 +53,10 @@ const Admindashboard = ({ changeUser, user }) => {
           emp._id === data.employeeId
             ? {
               ...emp,
-              tasks: data.tasks,
-              taskCounts: data.taskCounts,
-              todaySalary: data.todaySalary,
-              salaryStats: data.salaryStats,
+                tasks: [...data.tasks],                  // new array
+            taskCounts: { ...data.taskCounts },     // new object
+            todaySalary: data.todaySalary,
+            salaryStats: { ...data.salaryStats }    // new object
             }
             : emp
         )
@@ -67,23 +67,26 @@ const Admindashboard = ({ changeUser, user }) => {
       const message = `${data.employeeName} ${data.status} task: ${data.taskTitle}`;
 
       if (data.status === "accepted") {
-        acceptSound.play();
+        acceptSound.current.currentTime = 0;
+        acceptSound.current.play().catch(() => {});
         toast.info(message, {
-          style: { background: "#2563eb", color: "#fff" } // Blue
+          style: { background: "", color: "" } // Blue
         });
       }
 
       else if (data.status === "completed") {
-        completeSound.play();
+         completeSound.current.currentTime = 0;
+    completeSound.current.play().catch(() => {});
         toast.success(message, {
-          style: { background: "#16a34a", color: "#fff" } // Green
+          style: { background: "", color: "" } // Green
         });
       }
 
       else if (data.status === "failed") {
-        failedSound.play();
+        failedSound.current.currentTime = 0;
+    failedSound.current.play().catch(() => {});
         toast.error(message, {
-          style: { background: "#dc2626", color: "#fff" } // Red
+          style: { background: "", color: "" } // Red
         });
       }
     });
@@ -107,7 +110,7 @@ const Admindashboard = ({ changeUser, user }) => {
     };
 
     const handleEmployeeDeletedSocket = (id) => {
-      setEmployees(prev => prev.filter(emp => emp._id !== id));
+      setEmployees(prev => prev.filter(emp => emp._id.toString()  !== id.toString() ));
       toast.success("Employee deleted successfully!");
     };
 

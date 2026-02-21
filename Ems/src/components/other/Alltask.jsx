@@ -46,9 +46,9 @@ const Alltask = ({ employees, setEmployees, onEmployeeDeleted }) => {
       }
     };
 
-    socket.on("taskUpdated", handleTaskUpdated);
+    
 
-    return () => socket.off("taskUpdated", handleTaskUpdated);
+    return () => socket.off("taskUpdatedForAdmin", handleTaskUpdated);
   }, [setEmployees]);
 
   const employeesOnly = employees?.filter(emp => emp.role === "employee") || [];

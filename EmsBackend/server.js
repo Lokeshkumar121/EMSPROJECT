@@ -75,19 +75,18 @@ io.on("connection", (socket) => {
   // console.log("🔔 New user connected:", socket.id);
 
   socket.on("joinEmployeeRoom", (employeeId) => {
+     console.log("Employee Room Joined:", employeeId);
     socket.join(`employee_${employeeId}`);
   });
 
     socket.on("joinAdminRoom", () => {
     socket.join("adminRoom");
   });
-  
+
 
   // Employee task status update
-  socket.on("taskStatusUpdate", (data) => {
-    io.emit("taskStatusUpdate", data); // notify admin
-    // console.log("Task status update:", data);
-  });
+  // ✅ Employee task status update
+
 
   socket.on("disconnect", () => {
     // console.log("❌ User disconnected:", socket.id);

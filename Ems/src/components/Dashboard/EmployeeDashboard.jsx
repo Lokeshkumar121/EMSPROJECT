@@ -1,18 +1,12 @@
-import React, { useContext } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import Header from '../other/Header'
 import TaskNumberslist from '../other/TaskNumberslist'
 import Tasklist from '../task/Tasklist'
 import { Authcontext } from '../../context/AuthProvider'
 import socket from "../../socket";
-
-
-import { useEffect } from "react";
-// import { io } from "socket.io-client";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import SalaryCard from '../Dashboard/SalaryCard'
-
-
 
 // 🔹 Reusable StatusCard component
 const StatusCard = ({ title, subtitle, icon }) => {
@@ -26,90 +20,125 @@ const StatusCard = ({ title, subtitle, icon }) => {
     </div>
   )
 }
+
 const EmployeeDashboard = ({ changeUser, user }) => {
-  // const {userData} = useContext(Authcontext)
 
-  const { userData, fetchEmployees } = useContext(Authcontext);
+  const { userData } = useContext(Authcontext);
+  const [employee, setEmployee] = useState(null);
 
-  // read only
   const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'))
-  console.log(user)
 
-  // 🔹 Socket connection
+  // 🔹 SOCKET CONNECTION
+  // 🔹 SOCKET CONNECTION
   useEffect(() => {
     if (!loggedInUser) return;
 
-    // const socket = io("http://localhost:8080"); // backend URL
-    socket.emit("joinEmployeeRoom", loggedInUser._id);
 
-    // Listen for new task assignment
-   
-  // 🔔 NEW TASK ONLY
-  socket.on("taskAssigned", (data) => {
-    if (data.employeeId !== loggedInUser._id) return;
+    const joinRoom = () => {
+      console.log("Joining Employee Room:", loggedInUser._id); // 🔹 debug
+      socket.emit("joinEmployeeRoom", loggedInUser._id);
+    };
 
-    const audio = new Audio("/notification.mp3");
-    audio.play().catch(() => {});
 
-    toast.info(`New Task Assigned: ${data.task?.title}`, {
-      position: "top-right",
-      autoClose: 5000,
-    });
 
-    fetchEmployees();
-  });
-  // 🔄 Accept / Complete → Just Refresh
-  socket.on("taskStatusChanged", (data) => {
-    if (data.employeeId !== loggedInUser._id) return;
-    fetchEmployees();
-  });
+    if (socket.connected) joinRoom();
+    else socket.on("connect", joinRoom);
+
+    // 🔹 Notify Task Function
+    const notifyTask = (data, isNew = false) => {
+      if (data.employeeId.toString() !== loggedInUser._id.toString()) return;
+
+      let latestTask;
+      if (isNew) {
+        latestTask = data.tasks[data.tasks.length - 1];
+      } else {
+        latestTask = data.tasks.find(t => t._id.toString() === data.updatedTaskId.toString());
+      }
+
+      if (!latestTask) return;
+
+      // 🔔 Sound
+      const audio = new Audio("/notification.mp3");
+      audio.play().catch(() => { });
+
+      // 🔔 Toast
+      let msg = isNew
+        ? `New Task Assigned: ${latestTask.title}`
+        : `Task "${latestTask.title}" status updated`;
+      toast.info(msg, { position: "top-right", autoClose: 5000 });
+
+      // 🔹 Immutable state update (Critical)
+      setEmployee(prev => ({
+        ...prev,
+        tasks: [...data.tasks],
+        taskCounts: { ...data.taskCounts },
+        todaySalary: data.todaySalary,
+        salaryStats: { ...data.salaryStats }
+      }));
+    }
+
+    socket.on("taskAssigned", (data) => { 
+      console.log("TaskAssigned Event Received:", data); 
+      notifyTask(data, true) });
+    socket.on("taskUpdated", (data) => notifyTask(data));
 
     return () => {
-        socket.off("taskAssigned");
-    socket.off("taskStatusChanged");
+      socket.off("connect", joinRoom);
+      socket.off("taskAssigned");
+      socket.off("taskUpdated");
     };
   }, [loggedInUser?._id]);
 
-  // loading state
-  if (!userData || userData.length === 0) {
-    return <StatusCard
-      title="Loading Employees..."
-      subtitle="Please wait while we fetch the data."
-      icon="⏳"
-    />
-  }
+
+  // 🔹 FIND EMPLOYEE (IMPORTANT FIX: moved above return)
+  useEffect(() => {
+    if (!userData || !loggedInUser) return;
+
+    const emp = userData.find(
+      e => e.email?.toLowerCase() === loggedInUser.email?.toLowerCase()
+    );
+
+    if (emp) {
+      // ✅ always create new references
+      setEmployee({
+        ...emp,
+        tasks: [...emp.tasks],
+        taskCounts: { ...emp.taskCounts },
+        salaryStats: { ...emp.salaryStats }
+      });
+    }
+  }, [userData]);
+
+
+  // 🔹 CONDITIONS (Now correct order)
 
   if (!loggedInUser) {
-    return <StatusCard
-      title="No User Logged In"
-      subtitle="Please log in to continue."
-      icon="❌"
-    />
+    return (
+      <StatusCard
+        title="No User Logged In"
+        subtitle="Please log in to continue."
+        icon="❌"
+      />
+    );
   }
-
-  // find employee
-  const employee = userData.find(
-    e => e.email?.toLowerCase() === loggedInUser.email?.toLowerCase()
-  )
-  console.log("LoggedIn:", loggedInUser.email);
-  console.log("All employees:", userData.map(e => e.email));
-
 
   if (!employee) {
-    return <StatusCard
-      title="Employee Not Found"
-      subtitle="We couldn't find your profile."
-      icon="⚠️"
-    />
+    return (
+      <StatusCard
+        title="Loading..."
+        subtitle="Please wait while we fetch your data."
+        icon="⏳"
+      />
+    );
   }
 
+  // 🔹 FINAL UI
   return (
     <div className='p-10 bg-[#1c1c1c] text-white h-screen'>
       <Header changeUser={changeUser} user={loggedInUser} />
       <SalaryCard employee={employee} />
       <TaskNumberslist data={employee} />
       <Tasklist data={employee} />
-
     </div>
   )
 }

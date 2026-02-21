@@ -147,12 +147,14 @@ export const updateTaskStatus = async (req, res) => {
 
     // 🔥 Notify Employee (NO POPUP)
     
-    io.to(`employee_${employee._id}`).emit("taskStatusChanged", {
+    io.to(`employee_${employee._id}`).emit("taskUpdated", {
       employeeId: employee._id,
       tasks: employee.tasks,
       taskCounts: employee.taskCounts,
       todaySalary: employee.todaySalary,
       salaryStats: employee.salaryStats,
+      updatedTaskId: task._id, // 🔹 important
+  status:status  // 🔹 complete, failed, active
     });
 
     // 🔥 Notify Admin Dashboard
@@ -216,7 +218,10 @@ export const addTaskToEmployee = async (req, res) => {
     // 🔥 Notify Employee (NEW TASK ONLY)
     io.to(`employee_${employee._id}`).emit("taskAssigned", {
       employeeId: employee._id,
-      task: newTask,
+  tasks: employee.tasks,
+  taskCounts: employee.taskCounts,
+  todaySalary: employee.todaySalary,
+  salaryStats: employee.salaryStats,
     });
 
     // 🔥 Notify Admin Dashboard
