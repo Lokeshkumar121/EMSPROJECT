@@ -6,6 +6,36 @@ import axios from "axios";
 const Login = ({ setUser }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const speak = (name, role) => {
+    window.speechSynthesis.cancel(); // clear old speech
+
+    // 🔹 English Speech
+    const englishSpeech = new SpeechSynthesisUtterance(
+      role === "admin"
+        ? "Welcome Admin"
+        : `Welcome ${name}`
+    );
+    englishSpeech.lang = "en-US";
+    englishSpeech.rate = 1;
+
+    // 🔹 Hindi Speech
+    const hindiSpeech = new SpeechSynthesisUtterance(
+      role === "admin"
+        ? "स्वागत है एडमिन"
+        : `स्वागत है ${name}`
+    );
+    hindiSpeech.lang = "hi-IN";
+    hindiSpeech.rate = 1;
+
+    // English khatam hone ke baad Hindi start
+    englishSpeech.onend = () => {
+      window.speechSynthesis.speak(hindiSpeech);
+    };
+
+    window.speechSynthesis.speak(englishSpeech);
+  };
+
+
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -22,54 +52,62 @@ const Login = ({ setUser }) => {
     // setEmail("");
     // setPassword("");
     try {
-    // 🔹 Call backend API
-    const res = await axios.post("https://ems-backend-jy3w.onrender.com/api/auth/login", {
-      email,
-      password,
-    });
+      // 🔹 Call backend API
+      const res = await axios.post("https://ems-backend-jy3w.onrender.com/api/auth/login", {
+        email,
+        password,
+      });
 
-    // 🔹 Backend returned user data
-    const emp = res.data;
+      // 🔹 Backend returned user data
+      const emp = res.data;
 
 
-    // 🔹 Add role manually for frontend
-    
-const empUser = {
-  _id: emp._id,
-  role: emp.role,        // backend se
-  email: emp.email,
-  firstName: emp.firstName,
-  lastName: emp.lastName,
-};
+      // 🔹 Add role manually for frontend
 
-     // ✅ MOST IMPORTANT (MISSING LINE)
-   
-    localStorage.setItem("loggedInUser", JSON.stringify(empUser));
-setUser(empUser);
+      const empUser = {
+        _id: emp._id,
+        role: emp.role,        // backend se
+        email: emp.email,
+        firstName: emp.firstName,
+        lastName: emp.lastName,
+      };
 
-    toast.success("Login Successful");
+      // ✅ MOST IMPORTANT (MISSING LINE)
 
-    // 🔹 Store user in App state (or localStorage)
-    // This assumes you pass `setUser` from App.jsx
-    // setUser(user);
+      localStorage.setItem("loggedInUser", JSON.stringify(empUser));
+      setUser(empUser);
 
-    // Reset form
-    setEmail("");
-    setPassword("");
-  } catch (err) {
-    // 🔹 Check for hard-coded admin
+      toast.success("Login Successful");
+      speak(
+        `${empUser.firstName} ${empUser.lastName || ""}`,
+        empUser.role
+      );
+
+
+      // 🔹 Store user in App state (or localStorage)
+      // This assumes you pass `setUser` from App.jsx
+      // setUser(user);
+
+      // Reset form
+      setEmail("");
+      setPassword("");
+    } catch (err) {
+      // 🔹 Check for hard-coded admin
       if (email === "admin@me.com" && password === "123") {
-        const adminUser = { _id: "admin",
-    role: "admin",
-    firstName: "Admin",
-    email: "admin@me.com" };
+        const adminUser = {
+          _id: "admin",
+          role: "admin",
+          firstName: "Admin",
+          email: "admin@me.com"
+        };
         localStorage.setItem("loggedInUser", JSON.stringify(adminUser));
         setUser(adminUser);
         toast.success("Admin Login Successful");
+        speak("Admin", "admin");
       } else {
         toast.error(err.response?.data?.message || "Invalid Email or Password");
       }
-  }
+    }
   };
 
   return (
