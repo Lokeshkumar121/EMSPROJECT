@@ -1,19 +1,37 @@
+import React, { useState, useEffect } from "react";
 
+const images = [
+  "https://img.freepik.com/premium-photo/portrait-smiling-software-engineer-working-computer-office-it-company_236854-46003.jpg",
+  "https://www.alueducation.com/wp-content/uploads/2025/07/software-engr.webp",
+  "https://media.istockphoto.com/id/1491192988/photo/working-towards-a-bright-future.jpg?s=612x612&w=0&k=20&c=8l6p4Br4Jg0HiPTGVsc1V4r6melejSNF2lh3vFhnwXs=",
+  "https://media.sciencephoto.com/f0/43/32/01/f0433201-800px-wm.jpg",
+  "https://www.dice.com/binaries/medium/content/gallery/dice/insights/2022/09/shutterstock_2079730714.jpg",
+];
 
 const Hero = () => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Auto-slide logic
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex(prev => (prev + 1) % images.length);
+    }, 5000); // 5 seconds
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <section
-      className="relative text-center py-32 px-6 bg-cover bg-center"
-      style={{
-        backgroundImage:
-          "url('https://cdn.prod.website-files.com/6209ea9aee1f965d7fce7c19/649a89c89a17e113b6f49621_empployee%20mngment%20app%20(1).jpg')",
-      }}
-    >
-      {/* Dark Gradient Overlay */}
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+    <section className="relative text-center py-32 px-6 h-[90vh] overflow-hidden">
+      {/* Background Image */}
+      <div
+        className="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out"
+        style={{ backgroundImage: `url(${images[currentIndex]})` }}
+      ></div>
+
+      {/* Dark Overlay with opacity + blur */}
+      <div className="absolute inset-0 bg-black/50 "></div>
 
       {/* Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center">
+      <div className="relative z-10 flex flex-col items-center justify-center h-full">
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white leading-tight mb-6">
           Employee Management System
         </h1>
